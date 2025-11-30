@@ -21,11 +21,8 @@ except ImportError:
     pass
 
 # Matplotlib
-try:
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-except ImportError:
-    pass
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # SciPy
 from scipy.spatial.transform import Rotation
@@ -693,7 +690,6 @@ class Pose:
 
 
     # Visualization functions
-    @requires_package('matplotlib')
     def show(self, **args) -> Axes3D:
         """
         Visualize the `Pose` in a 3D matloptlib plot.
@@ -702,7 +698,6 @@ class Pose:
 
 
     @staticmethod
-    @requires_package('matplotlib')
     def visualize(poses: Pose | list[Pose],
                   axes: Optional[Axes3D] = None,
                   savefig: Optional[str] = None,
@@ -800,7 +795,6 @@ class Pose:
 
 
     @staticmethod
-    @requires_package('matplotlib')
     def _plot_arrow(ax: Axes3D, origin: NDArray, vector: NDArray, **args) -> None:
         ax.plot3D([origin[0], origin[0] + vector[0]],
                     [origin[1], origin[1] + vector[1]],

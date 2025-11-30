@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v4
@@ -29,10 +31,7 @@ jobs:
 
     - name: Install package and dependencies
       run: |
-        pip install .
-        pip install matplotlib
-        pip install pycolmap
-        pip install cython-bbox
+        pip install .[all]
 
     - name: Test with pytest
       run: |
