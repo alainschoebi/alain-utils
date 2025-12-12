@@ -10,12 +10,28 @@ authors = [
     { name = "Alain Schoebi", email = "alain.schoebi@gmx.ch" }
 ]
 requires-python = ">=3.10"
+
+# Core dependencies
 dependencies = [
     "pre-commit",
     "pytest",
     "numpy",
     "colorama",
     "scipy",
+    "matplotlib",
+]
+
+# All optional dependencies
+[project.optional-dependencies]
+all = [
+    "plotly",
+    "opencv-python",
+    "tqdm",
+    "shapely",
+    "pycolmap",
+    "numpy<2", # Ensures compatibility with cython-bbox
+    "cython-bbox",
+    "imageio[ffmpeg] >= 2.21.0",  # Ensures FFmpeg support with imageio
 ]
 
 [tool.setuptools]

@@ -98,8 +98,8 @@ def points_to_marker(points: NDArray, colors: NDArray, scale: int = 0.2,
     marker.pose = Pose().to_ros_pose()
     marker.scale = Vector3(scale,scale,scale)
 
-    marker.points = [Point(*point) for point in tqdm(points, leave=False, desc="Copying points")]
-    marker.colors = [ColorRGBA(*color) for color in tqdm(colors, leave=False, desc="Copying colors")]
+    marker.points = [Point(*point) for point in tqdm(points, leave=False, desc="Copying points", unit="point")]
+    marker.colors = [ColorRGBA(*color) for color in tqdm(colors, leave=False, desc="Copying colors", unit="color")]
 
     return marker
 

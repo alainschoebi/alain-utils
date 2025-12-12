@@ -81,3 +81,19 @@ def test_color_constructor():
     with pytest.raises(Exception): Color("lime", opacity=0.5, alpha=0.5)
     with pytest.raises(Exception): Color("lime", opacity=0.5, a=0.5)
     with pytest.raises(Exception): Color("lime", alpha=0.5, a=0.5)
+
+    with pytest.raises(Exception):
+      Color("#bd88ab67", opacity=0.5)
+    Color("#b81b84")
+    Color("#b81b84", opacity=0.5)
+    Color("#b81b8458")
+
+    c = Color("#88fb14")
+    assert c.hex == "#88fb14"
+
+    c = Color("#88fb14", opacity=0.5)
+    assert c.hex == "#88fb1480"
+
+    c = Color("#b81b8443")
+    assert c.hex == "#b81b8443"
+

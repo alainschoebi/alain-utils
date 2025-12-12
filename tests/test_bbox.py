@@ -52,3 +52,24 @@ def test_operators():
         assert bbox + 7 == BBox(bbox.x + 7, bbox.y + 7, bbox.w, bbox.h)
         assert bbox + (-3, -71) == BBox(bbox.x - 3, bbox.y - 71, bbox.w, bbox.h)
         assert (bbox * 3).area == pytest.approx(bbox.area * 3**2)
+
+def test_containment():
+
+    for _ in range(100):
+        bbox = BBox.random()
+
+        assert bbox in bbox
+        assert bbox in (bbox + (0, 0))
+        assert (bbox.x, bbox.y) in bbox
+        assert [bbox.x, bbox.y] in bbox
+        assert (bbox.x2, bbox.y2) in bbox
+        assert (bbox.x + bbox.w/3, bbox.y + bbox.h/2) in bbox
+        assert bbox.corners()[0] in bbox
+        assert bbox * 0.8 in bbox
+        assert bbox * 0.5 in bbox
+        assert bbox * 0.49 + (bbox.w/4, bbox.h/4) in bbox
+
+        assert not bbox in (bbox + (bbox.w, bbox.h))
+        assert not (bbox.x1 - 1, bbox.y1 - 1) in bbox
+        assert not (bbox.x2 + 1, bbox.y2 + 1) in bbox
+        assert not bbox * 0.5 + (bbox.w/2, bbox.h/2) in bbox

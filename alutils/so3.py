@@ -44,7 +44,7 @@ def plus_operator(R: SO3, omega: Vector3) -> SO3:
     Inputs
     - R:     `NDArray(3, 3)` the reference rotation matrix, i.e. an element in
              SO(3).
-    - omega: `NDArray(3,)` or `NDArray(3, 1)` or `List` the rotation vector
+    - omega: `NDArray(3,)` or `NDArray(3, 1)` or `list` the rotation vector
              lying in the tangent space of SO(3) at R.
 
     Returns

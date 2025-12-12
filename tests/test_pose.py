@@ -61,9 +61,9 @@ def test_general():
 
         pose = Pose.random()
         euler_xyz = pose.euler_angles('xyz')
-        R_x = Pose.from_rotation_angle_and_axis(euler_xyz[0], [1, 0, 0]).R
-        R_y = Pose.from_rotation_angle_and_axis(euler_xyz[1], [0, 1, 0]).R
-        R_z = Pose.from_rotation_angle_and_axis(euler_xyz[2], [0, 0, 1]).R
+        R_x = Pose.from_angle_and_axis(euler_xyz[0], [1, 0, 0]).R
+        R_y = Pose.from_angle_and_axis(euler_xyz[1], [0, 1, 0]).R
+        R_z = Pose.from_angle_and_axis(euler_xyz[2], [0, 0, 1]).R
         R = R_x @ R_y @ R_z
         np.testing.assert_array_almost_equal(pose.R, R)
         np.testing.assert_array_almost_equal(
@@ -72,9 +72,9 @@ def test_general():
 
         pose = Pose.random()
         euler_xyz = pose.euler_angles('zyz')
-        R_0 = Pose.from_rotation_angle_and_axis(euler_xyz[0], [0, 0, 1]).R
-        R_1 = Pose.from_rotation_angle_and_axis(euler_xyz[1], [0, 1, 0]).R
-        R_2 = Pose.from_rotation_angle_and_axis(euler_xyz[2], [0, 0, 1]).R
+        R_0 = Pose.from_angle_and_axis(euler_xyz[0], [0, 0, 1]).R
+        R_1 = Pose.from_angle_and_axis(euler_xyz[1], [0, 1, 0]).R
+        R_2 = Pose.from_angle_and_axis(euler_xyz[2], [0, 0, 1]).R
         R = R_0 @ R_1 @ R_2
         np.testing.assert_array_almost_equal(pose.R, R)
         np.testing.assert_array_almost_equal(
@@ -99,7 +99,7 @@ def test_access_rights():
     with pytest.raises(Exception): R[0,0] = 9
     with pytest.raises(Exception): t[0] = 9
 
-    p0 = Pose.from_rotation_angle_and_axis(1, np.array([1,1,1]))
+    p0 = Pose.from_angle_and_axis(1, np.array([1,1,1]))
     R = p0.R
     t = np.array([9, 8, 1])
 

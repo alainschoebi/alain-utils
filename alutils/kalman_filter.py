@@ -1,5 +1,5 @@
 # Typing
-from typing import NewType, Tuple, Optional
+from typing import Optional, overload
 
 # Numpy
 import numpy as np
@@ -16,9 +16,19 @@ except ImportError:
 State = NDArray
 Covariance = NDArray
 
+@overload
+def prior_update(x_m: None, P_m: Covariance,
+                 A: NDArray, b: None, Q: Covariance) \
+                   -> tuple[None, Covariance]: ...
+
+@overload
 def prior_update(x_m: State, P_m: Covariance,
                  A: NDArray, b: NDArray, Q: Covariance) \
-                   -> Tuple[State, Covariance]:
+                    -> tuple[State, Covariance]: ...
+
+def prior_update(x_m: State | None, P_m: Covariance,
+                 A: NDArray, b: NDArray | None, Q: Covariance) \
+                   -> tuple[State | None, Covariance]:
    """
    Prior update of the Kalman Filter, also referred to as the prediction step.
 
@@ -79,13 +89,31 @@ def prior_update(x_m: State, P_m: Covariance,
 
    return x_p, P_p
 
+@overload
+def measurement_update(x_p: None, P_p: Covariance,
+                       z: None, H: NDArray, R: Covariance,
+                       KALMAN_GAIN_FORM: bool = True,
+                       JOSEPH_FORM: bool = True,
+                       symmetry_tol: float = 1e-8,
+                       invertibility_eps: float = 1e-20) \
+                         -> tuple[None, Covariance]: ...
+
+@overload
+def measurement_update(x_p: State, P_p: Covariance,
+                       z: State, H: NDArray, R: Covariance,
+                       KALMAN_GAIN_FORM: bool = True,
+                       JOSEPH_FORM: bool = True,
+                       symmetry_tol: float = 1e-8,
+                       invertibility_eps: float = 1e-20) \
+                         -> tuple[State, Covariance]: ...
+
 def measurement_update(x_p: State | None, P_p: Covariance,
                        z: NDArray | None, H: NDArray, R: Covariance,
                        KALMAN_GAIN_FORM: Optional[bool] = True,
                        JOSEPH_FORM: Optional[bool] = True,
                        symmetry_tol: Optional[float] = 1e-8,
                        invertibility_eps: Optional[float] = 1e-20) \
-                         -> Tuple[State, Covariance]:
+                         -> tuple[State | None, Covariance]:
    """
    Measurement update of the Kalman Filter, also referred to as the a posteriori
    update.

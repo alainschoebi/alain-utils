@@ -2,21 +2,16 @@
 import numpy as np
 from numpy.typing import NDArray
 
-# Python
-from typing import Tuple
-
 # Utils
 from .pose import Pose
 from .base import homogenized, dehomogenized
 
-
-def get_homogeneous_pixels_array(image_shape: Tuple[int]) -> NDArray:
-
+def get_homogeneous_pixels_array(image_shape: tuple[int]) -> NDArray:
     """
     Create a pixel array containing homogeneous coordinates (u, v, 1) for every pixel coordinate in an image.
 
     Inputs
-    - image_shape: Tuple describing the dimensions of the image, (H, W)
+    - image_shape: tuple describing the dimensions of the image, (H, W)
 
     Outputs
     - pixels:      (H, W, 3) array containing the homogeneous coordinates
@@ -131,7 +126,7 @@ class PinholeCamera:
         return dehomogenized((self.K_inv @ coordinates[..., np.newaxis])[..., 0]) # (N, 2)
 
 
-    def project(self, points: NDArray, return_depth: bool = False) -> NDArray | Tuple[NDArray, NDArray]:
+    def project(self, points: NDArray, return_depth: bool = False) -> NDArray | tuple[NDArray, NDArray]:
         """
         Project 3D homogeneous (..., 4) or euclidean (..., 3) points from the world frme to the image in 2D pixel
         coordinates (... , 2).

@@ -1,29 +1,26 @@
-# Typing
-from typing import Dict
-
 # Logging
 from .loggers import get_logger
 logger = get_logger(__name__)
 
-def update_config_dict(config_to_update: Dict,
-                       config_to_add: Dict,
-                       default_config: Dict) -> None:
+def update_config_dict(config_to_update: dict,
+                       config_to_add: dict,
+                       default_config: dict) -> None:
     """
     Set partial configuration.
 
     Inputs
-    - config_to_edit: `Dict` base configuration which will be updated
-    - config_to_add:  `Dict` partial configuration to add
-    - default_config: `Dict` default configuration used for checking the
+    - config_to_edit: `dict` base configuration which will be updated
+    - config_to_add:  `dict` partial configuration to add
+    - default_config: `dict` default configuration used for checking the
                        types and names of the arguments.
 
     Note: the values of the `config_to_add` configuration are not being copied.
           That is, the `config_to_update` will contain the same objects.
     """
 
-    if not type(config_to_update) == dict or \
-       not type(config_to_add) == dict or \
-       not type(default_config) == dict:
+    if not isinstance(config_to_update, dict) or \
+       not isinstance(config_to_add, dict) or \
+       not isinstance(default_config, dict):
        logger.error("The configurations must be dictionaries.")
        raise ValueError("The configurations must be dictionaries.")
 
@@ -39,7 +36,7 @@ def update_config_dict(config_to_update: Dict,
             default_type = type(default_config[key])
 
             # Same type
-            if type(value) == default_type:
+            if isinstance(value, default_type):
                 config_to_update[key] = value
 
             # Try to convert the value to the default type
@@ -55,5 +52,6 @@ def update_config_dict(config_to_update: Dict,
                                      f"value has type {type(value)}.")
 
         else:
-            update_config_dict(config_to_update[key], value,
-                               default_config[key])
+            update_config_dict(
+                config_to_update[key], value, default_config[key]
+            )

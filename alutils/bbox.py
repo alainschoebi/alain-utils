@@ -1,6 +1,6 @@
 # Typing
 from __future__ import annotations
-from typing import Optional, List, Tuple, Any
+from typing import Optional, Any, cast
 
 # Numpy
 import numpy as np
@@ -13,12 +13,9 @@ from pathlib import Path
 from .decorators import requires_package
 
 # Matplotlib
-try:
-    import matplotlib
-    import matplotlib.pyplot as plt
-    from matplotlib.axes import Axes
-except ImportError:
-    pass
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 # Cython BBox
 try:
@@ -226,11 +223,11 @@ class BBox:
                          [self.x2, self.y1]])
 
 
-    def xywh_tuple(self) -> Tuple[float, float, float, float]:
+    def xywh_tuple(self) -> tuple[float, float, float, float]:
         """
-        Returns a `Tuple` (x, y, w, h).
+        Returns a `tuple` (x, y, w, h).
         """
-        return list(self)
+        return cast(tuple[float, float, float, float], tuple(self))
 
     def xywh_array(self) -> NDArray:
         """
@@ -239,9 +236,9 @@ class BBox:
         return np.array([*self.xywh_tuple()])
 
 
-    def xyxy_tuple(self) -> Tuple[float, float, float, float]:
+    def xyxy_tuple(self) -> tuple[float, float, float, float]:
         """
-        Returns a `Tuple` (x1, y1, x2, y1).
+        Returns a `tuple` (x1, y1, x2, y1).
         """
         return self.x1, self.y1, self.x2, self.y2
 
@@ -270,9 +267,9 @@ class BBox:
         """
         return np.mean(self.xyxy_matrix(), axis=0)
 
-    def center_wh_tuple(self) -> Tuple[float, float, float, float]:
+    def center_wh_tuple(self) -> tuple[float, float, float, float]:
         """
-        Returns a `Tuple` (x_center, y_center, w, h).
+        Returns a `tuple` (x_center, y_center, w, h).
         """
         return *self.center(), self.w, self.h
 
@@ -298,8 +295,8 @@ class BBox:
         """
         Return `True` if the `BBox` intersects with another `BBox`.
         """
-        if bbox_1.x2() > bbox_2.x and bbox_1.y2() > bbox_2.y and \
-           bbox_1.x < bbox_2.x2() and bbox_1.y < bbox_2.y2():
+        if bbox_1.x2 > bbox_2.x and bbox_1.y2 > bbox_2.y and \
+           bbox_1.x < bbox_2.x2 and bbox_1.y < bbox_2.y2:
             return True
         else:
             return False
@@ -335,7 +332,7 @@ class BBox:
 
         return BBox.from_xyxy(
             max(bbox_1.x, bbox_2.x), max(bbox_1.y, bbox_2.y),
-            min(bbox_1.x2(), bbox_2.x2()), min(bbox_1.y2(), bbox_2.y2())
+            min(bbox_1.x2, bbox_2.x2), min(bbox_1.y2, bbox_2.y2)
         )
 
     def intersection_with(self, bbox: BBox,
@@ -358,27 +355,99 @@ class BBox:
         """
         return BBox.intersection(self, bbox, intersect_check=intersect_check)
 
-
     # Operators
-    def __add__(self, x: Any) -> BBox:
-        if not isinstance(x, (int, float, tuple)):
+    def __contains__(
+            self,
+            other: tuple[float, float] | list[float] | NDArray | BBox
+        ) -> bool:
+        # TODO: add support for multiple points, i.e. list of tuples or arrays
+        if isinstance(other, tuple):
+            if not len(other) == 2:
+                logger.error(
+                    f"BBox containment check with tuple `{other}` of length " +
+                    f"{len(other)} is not supported. Length must be 2."
+                )
+                raise ValueError(
+                    f"BBox containment check with tuple `{other}` of length " +
+                    f"{len(other)} is not supported. Length must be 2."
+                )
+            if not isinstance(other[0], (int, float)) or \
+               not isinstance(other[1], (int, float)):
+                logger.error(
+                    f"BBox containment check with tuple `{other}` is not " +
+                    f"supported. Tuple must contain two scalars."
+                )
+                raise ValueError(
+                    f"BBox containment check with tuple `{other}` is not " +
+                    f"supported. Tuple must contain two scalars."
+                )
+            return (self.x <= other[0] <= self.x2 and
+                    self.y <= other[1] <= self.y2)
+        if isinstance(other, list):
+            if not len(other) == 2:
+                logger.error(
+                    f"BBox containment check with list `{other}` of length " +
+                    f"{len(other)} is not supported. Length must be 2."
+                )
+                raise ValueError(
+                    f"BBox containment check with list `{other}` of length " +
+                    f"{len(other)} is not supported. Length must be 2."
+                )
+            if not isinstance(other[0], (int, float)) or \
+               not isinstance(other[1], (int, float)):
+                logger.error(
+                    f"BBox containment check with list `{other}` is not " +
+                    f"supported. List must contain two scalars."
+                )
+                raise ValueError(
+                    f"BBox containment check with list `{other}` is not " +
+                    f"supported. List must contain two scalars."
+                )
+            return (other[0], other[1]) in self
+        if isinstance(other, np.ndarray):
+            if not other.ndim == 1 or not len(other) == 2:
+                logger.error(
+                    f"BBox containment check with array `{other}` of shape " +
+                    f"{other.shape} is not supported. Shape must be (2,)."
+                )
+                raise ValueError(
+                    f"BBox containment check with array `{other}` of shape " +
+                    f"{other.shape} is not supported. Shape must be (2,)."
+                )
+            return (other[0], other[1]) in self
+        if isinstance(other, BBox):
+            # Check if the other BBox is completely contained in this BBox
+            return all(corner in self for corner in other.corners())
+        logger.error(
+            f"BBox containment check not supported with type `{type(other)}`."
+        )
+        raise NotImplementedError(
+            f"BBox containment check not supported with type `{type(other)}`."
+        )
+
+
+    def __add__(self, d: Any) -> BBox:
+        """
+        Shifts the bounding BBox by a scalar `d` or by a tuple `(d_x, d_y)`.
+        """
+        if not isinstance(d, (int, float, tuple)):
             logger.error(
-                f"BBox addition with type {type(x)} is not supported."
+                f"BBox addition with type `{type(d)}` is not supported."
             )
             raise NotImplementedError(
-                f"BBox addition with type {type(x)} is not supported."
+                f"BBox addition with type `{type(d)}` is not supported."
             )
-        if isinstance(x, (int, float)):
-            return BBox(self.x + x, self.y + x, self.w, self.h)
-        if isinstance(x, tuple):
-            if len(x) == 2 and all(isinstance(i, (int, float)) for i in x):
-                return BBox(self.x + x[0], self.y + x[1], self.w, self.h)
+        if isinstance(d, (int, float)):
+            return BBox(self.x + d, self.y + d, self.w, self.h)
+        if isinstance(d, tuple):
+            if len(d) == 2 and all(isinstance(i, (int, float)) for i in d):
+                return BBox(self.x + d[0], self.y + d[1], self.w, self.h)
             else:
                 logger.error(
-                    f"BBox addition with tuple {x} is not supported."
+                    f"BBox addition with tuple `{d}` is not supported."
                 )
                 raise NotImplementedError(
-                    f"BBox addition with tuple {x} is not supported."
+                    f"BBox addition with tuple `{d}` is not supported."
                 )
 
 
@@ -430,7 +499,6 @@ class BBox:
 
 
     # Visualization functions
-    @requires_package('matplotlib')
     def show(self, axes: Optional[Axes] = None,
              savefig: Optional[str | Path] = None, **args) -> Axes:
         """
@@ -439,8 +507,7 @@ class BBox:
         return BBox.visualize(self, axes, savefig, **args)
 
     @staticmethod
-    @requires_package('matplotlib')
-    def visualize(bboxes: BBox | List[BBox],
+    def visualize(bboxes: BBox | list[BBox],
                   axes: Optional[Axes] = None,
                   savefig: Optional[str | Path] = None,
                   show: Optional[bool] = True,
@@ -479,7 +546,7 @@ class BBox:
         if savefig or axes:
             show = False
 
-        if not type(bboxes) == list:
+        if isinstance(bboxes, BBox):
             bboxes = [bboxes]
 
         # Save figure

@@ -1,13 +1,15 @@
 # Typing
-from typing import List, Tuple
+from typing import Optional
 
 # Python
-import logging
-from logging import Logger
 from pathlib import Path
 from colorama import Fore, Style
 
-def get_all_loggers_name() -> List[str]:
+# Logging
+import logging
+from logging import Logger
+
+def get_all_loggers_name() -> list[str]:
     return list(Logger.manager.loggerDict.keys())
 
 
@@ -16,7 +18,7 @@ def set_all_loggers_level_to(level: int = logging.WARNING):
         logging.getLogger(name).setLevel(level)
 
 
-def markdown_to_text(md: str) -> Tuple[str, bool]:
+def markdown_to_text(md: str) -> tuple[str, bool]:
     bold = False
     while len(md) > 0 and (md[0] == '#' or md[0] == '*'):
         md = md[1:]
@@ -27,11 +29,13 @@ def markdown_to_text(md: str) -> Tuple[str, bool]:
     return md, bold
 
 
-def get_logger(name: str = "my_logger",
-               log_file: str = None,
-               console_log_level: int = logging.DEBUG,
-               log_file_level: int = logging.DEBUG,
-               console_format: str = None) -> Logger:
+def get_logger(
+        name: str = "my_logger",
+        log_file: Optional[Path | str] = None,
+        console_log_level: int = logging.DEBUG,
+        log_file_level: int = logging.DEBUG,
+        console_format: Optional[str] = None,
+    ) -> Logger:
     """
     Gets or creates a new logger.
     """
@@ -49,14 +53,20 @@ def get_logger(name: str = "my_logger",
 
     # Create log file or empty the log file
     if log_file is not None:
-        if Path(log_file).exists(): Path(log_file).unlink()
-        f = open(log_file, "x"); f.close()
+        log_file = Path(log_file)
+        if log_file.exists():
+            log_file.unlink()
+        try:
+            f = open(log_file, "x")
+        except FileNotFoundError as e:
+            raise e
+        f.close()
 
         # File handler
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(log_file_level)
 
-        if log_file[-3:] == ".md":
+        if log_file.suffix == ".md":
             file_handler.setFormatter(KeepMarkdownFormatter())
         else:
             file_handler.setFormatter(logging.Formatter("%(message)s"))

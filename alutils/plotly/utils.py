@@ -3,7 +3,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 # Python
-from typing import List, List, Optional, Tuple
+from typing import Optional
 import math
 
 # Plotly
@@ -25,23 +25,36 @@ from alutils.bbox import BBox
 from alutils.loggers import get_logger
 logger = get_logger(__name__)
 
-def array_to_latex(array: NDArray, decimals: int = 2) -> str:
+def array_to_latex(
+        array: NDArray,
+        *,
+        decimals: int = 2,
+        max_dimension: int | None = None,
+    ) -> str:
+    if not isinstance(array, np.ndarray):
+        raise TypeError(f"Expected input `array` to be of type `NDArray`, " +
+                        f"but found `{type(array)}`.")
+
+    # Matrix larger than `max_dimension` or more than 2 dimensions (tensor)
+    if max_dimension is not None and \
+       any(d > max_dimension for d  in array.shape) or array.ndim > 2:
+        return r"$" + (r"\times").join(map(str, array.shape)) + \
+               r"\text{ matrix}$"
+    # Vector R^n
     if array.ndim == 1:
         vals = [f"{x:.{decimals}f}" for x in array]
         return r"$\begin{pmatrix} " + r" \\ ".join(vals) + \
                r" \end{pmatrix}$"
+    # Matrix R^{m x n}
     elif array.ndim == 2:
         rows = [" & ".join(f"{x:.{decimals}f}" for x in row) for row in array]
         return r"$\begin{pmatrix} " + r" \\ ".join(rows) + \
                r" \end{pmatrix}$"
     else:
-        raise NotImplementedError(
-            f"Cannot convert array of dimension {array.ndim} to LaTeX. " +
-            f"Only 1D and 2D arrays are supported."
-        )
+        raise NotImplementedError(f"This error should not be raised.")
 
 @requires_package("shapely")
-def get_2d_boundary(vertices: NDArray, faces: NDArray) -> List[NDArray]:
+def get_2d_boundary(vertices: NDArray, faces: NDArray) -> list[NDArray]:
     """
     Computes the 2D boundary of a 2D mesh defined by its vertices and faces.
 
@@ -50,7 +63,7 @@ def get_2d_boundary(vertices: NDArray, faces: NDArray) -> List[NDArray]:
     - faces: `NDArray(M, 3)` of integers representing the faces of the mesh.
 
     Returns
-    - boundaries: `List[NDArray(N, 2)]` the 2D boundaries of the mesh. Since the
+    - boundaries: `list[NDArray(N, 2)]` the 2D boundaries of the mesh. Since the
                   mesh can be composed of multiple disjoint parts, the
                   boundaries are returned as a list of 2D vertices.
     """
@@ -84,7 +97,7 @@ def get_2d_boundary(vertices: NDArray, faces: NDArray) -> List[NDArray]:
 @requires_package("plotly", "shapely")
 def gaussian_1d_traces(
     mu: float, var: float, *values: float, S: int = 100,
-    color: Optional[str] = 'cyan') -> List[go.Contour | go.Scatter]:
+    color: Optional[str] = 'cyan') -> list[go.Contour | go.Scatter]:
     """
     Generates the traces for a 1D Gaussian distribution. It plots the PDF.
 
@@ -98,7 +111,7 @@ def gaussian_1d_traces(
     - S: `int` the number of points used to draw the PDF.
 
     Returns:
-    - traces: `List[go.Scatter]` the traces of the Gaussian distribution.
+    - traces: `list[go.Scatter]` the traces of the Gaussian distribution.
     """
 
     if var <= 0:
@@ -161,8 +174,8 @@ def gaussian_2d_traces(
     output_size: Optional[BBox] = None,
     n_ellipse: int = 100, n_contour: int = 100,
     primary_color: str = "cyan", secondary_color: str = "blue",
-    colorscale: str | List = "Viridis"
-    ) -> List[go.Contour | go.Scatter]:
+    colorscale: str | list = "Viridis"
+    ) -> list[go.Contour | go.Scatter]:
     """
     Generates the traces for a 2D Gaussian distribution. It plots the mean, the
     1 standard deviation and the 2 standard deviation ellipses, and the contour
@@ -185,11 +198,11 @@ def gaussian_2d_traces(
     - n_contour:       `int` the number of points used to draw the contour map.
     - primary_color:   `str` the primary color used for drawing the curves.
     - secondary_color: `str` the secondary color used for drawing the curves.
-    - colorscale:      `str | List[...]` the colorscale used for drawing the
+    - colorscale:      `str | list[...]` the colorscale used for drawing the
                         contours.
 
     Returns:
-    - traces: `List[go.Contour | go.Scatter]` the traces of the Gaussian
+    - traces: `list[go.Contour | go.Scatter]` the traces of the Gaussian
                distribution.
     """
 
@@ -305,7 +318,7 @@ def bin_to_plot(
     num_bins: Optional[int] = 100,
     min_x: Optional[float] = 0, max_x: Optional[float | None] = None,
     return_y_cov: Optional[float] = False
-    ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
+    ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """
     Bin some (x, y) datapoints into bins in order to plot them.
 

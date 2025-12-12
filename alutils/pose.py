@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+# Typing
+from typing import Optional, overload
+
 # NumPy
 import numpy as np
 from numpy.typing import NDArray
-
-# Python
-from typing import Tuple, List, Optional
 
 # ROS
 try:
@@ -21,11 +21,8 @@ except ImportError:
     pass
 
 # Matplotlib
-try:
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-except ImportError:
-    pass
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # SciPy
 from scipy.spatial.transform import Rotation
@@ -47,14 +44,14 @@ class Pose:
 
     # Default constructor
     def __init__(self, R: NDArray = np.eye(3),
-                 t: NDArray | List = np.zeros(3),
-                 tol: float = 1e-12) -> Pose:
+                 t: NDArray | list = np.zeros(3),
+                 tol: float = 1e-12) -> None:
         """
         Default constructor of the `Pose` class.
 
         Inputs
         - R: `NDArray(3,3)` 3D rotation matrix
-        - t: `NDArray(3,)` or `NDArray(3, 1)` or `List` 3D translation vector
+        - t: `NDArray(3,)` or `NDArray(3, 1)` or `list` 3D translation vector
 
         Optional inputs
         - tol: `float` tolerance for validating the rotation matrix. Default is
@@ -99,16 +96,16 @@ class Pose:
         self.__quat_xyzw.flags.writeable = False # Make read-only
 
 
-    def set_t(self, t: NDArray | List):
+    def set_t(self, t: NDArray | list):
         """Set the translation vector t"""
         if not isinstance(t, (np.ndarray, list)):
             logger.error(
                 f"Expected translation vector to be a 3D vector given as a " +
-                f"`NDArray(3,)`, `NDArray(3, 1)` or a `List`, found {type(t)}."
+                f"`NDArray(3,)`, `NDArray(3, 1)` or a `list`, found {type(t)}."
             )
             raise TypeError(
                 f"Expected translation vector to be a 3D vector given as a " +
-                f"`NDArray(3,)`, `NDArray(3, 1)` or a `List`, found {type(t)}."
+                f"`NDArray(3,)`, `NDArray(3, 1)` or a `list`, found {type(t)}."
             )
         t = np.squeeze(np.array(t)).astype(float)
         if not t.shape == (3,):
@@ -202,7 +199,7 @@ class Pose:
 
 
     @t.setter
-    def t(self, t: NDArray | List):
+    def t(self, t: NDArray | list):
         """Set the translation vector t."""
         self.set_t(t)
 
@@ -268,7 +265,7 @@ class Pose:
         return Rotation.from_matrix(self.R.copy()).as_rotvec()
 
 
-    def rotation_angle_and_axis(self) -> Tuple[float, NDArray]:
+    def rotation_angle_and_axis(self) -> tuple[float, NDArray]:
         """
         Compute the angle and axis of the rotation matrix of the pose. The angle
         is given in radians and the axis is a unit 3D vector.
@@ -278,7 +275,7 @@ class Pose:
         - axis `NDArray(3,)`: the axis of the rotation (unit vector)
         """
         angle_axis = self.angle_axis()
-        angle = np.linalg.norm(angle_axis)
+        angle = float(np.linalg.norm(angle_axis))
         axis = angle_axis / angle
         return angle, axis
 
@@ -343,7 +340,7 @@ class Pose:
         Returns
         - error: `float` the distance error
         """
-        return np.linalg.norm(p1.t - p2.t)
+        return float(np.linalg.norm(p1.t - p2.t))
 
 
     @staticmethod
@@ -366,13 +363,13 @@ class Pose:
         - error: `float` the angular error in radians (or degrees)
         """
         pose_diff = p1 * p2.inverse
-        angle = np.linalg.norm(pose_diff.angle_axis())
+        angle = float(np.linalg.norm(pose_diff.angle_axis()))
         return angle if not degrees else np.rad2deg(angle)
 
 
     @staticmethod
     def error(p1: Pose, p2: Pose,
-              degrees: Optional[bool] = False) -> Tuple[float, float]:
+              degrees: Optional[bool] = False) -> tuple[float, float]:
         """
         Compute the distance and angular error between two `Pose` instances.
 
@@ -409,16 +406,18 @@ class Pose:
 
 
     @staticmethod
-    def from_rotation_angle_and_axis(angle: float, axis: NDArray | List,
-                                     t: NDArray | List = np.zeros(3),
-                                     degrees: Optional[bool] = False) \
-                                          -> Pose:
+    def from_angle_and_axis(
+            angle: float,
+            axis: NDArray | list,
+            t: NDArray | list = np.zeros(3),
+            degrees: Optional[bool] = False
+        ) -> Pose:
         """
         Get a `Pose` from an angle in radians (or degrees) and a 3D axis vector.
 
         Inputs
         - angle: `float` the angle of rotation in radians (or degrees)
-        - axis: `NDArray(3,)` or `NDArray(3, 1)` or `List` the axis of rotation.
+        - axis: `NDArray(3,)` or `NDArray(3, 1)` or `list` the axis of rotation.
                 The axis vector does not necessarily need to be normalized.
 
         Optional inputs
@@ -434,14 +433,14 @@ class Pose:
 
 
     @staticmethod
-    def from_rotation_vector(rot_vec: NDArray | List,
-                             t: NDArray | List = np.zeros(3)) -> Pose:
+    def from_rotation_vector(rot_vec: NDArray | list,
+                             t: NDArray | list = np.zeros(3)) -> Pose:
         """
         Get a `Pose` from a rotation vector that captures the axis and the angle
         through its norm.
 
         Inputs
-        - rot_vec: `NDArray(3,)` or `NDArray(3, 1)` or `List` the input rotation
+        - rot_vec: `NDArray(3,)` or `NDArray(3, 1)` or `list` the input rotation
                    vector
         """
         rot_vec = np.squeeze(np.array(rot_vec)).astype(float)
@@ -451,14 +450,14 @@ class Pose:
 
 
     @staticmethod
-    def from_quat_xyzw(q: NDArray | List,
-                       t: NDArray | List = np.zeros(3)) -> Pose:
+    def from_quat_xyzw(q: NDArray | list,
+                       t: NDArray | list = np.zeros(3)) -> Pose:
         """
         Get a `Pose` from quaternions `q = (x, y, z, w)` and a translation
         vector `t = (x, y, z)`.
 
         Inputs
-        - q: `NDArray(4,)` or `List` the input quaternions `(x, y, z, w)`
+        - q: `NDArray(4,)` or `list` the input quaternions `(x, y, z, w)`
 
         Note: the quaternion does not necessarily need to be normalized.
         """
@@ -469,18 +468,18 @@ class Pose:
 
 
     @staticmethod
-    def from_quat_wxyz(q: NDArray | List,
-                       t: NDArray | List = np.zeros(3)) -> Pose:
+    def from_quat_wxyz(q: NDArray | list,
+                       t: NDArray | list = np.zeros(3)) -> Pose:
         """
         Get a `Pose` from quaternions `q = (w, x, y, z)` and a translation
         vector `t = (x, y, z)`.
 
         Inputs
-        - q: `NDArray(4,)` or `List` the input quaternions `(w, x, y, z)`
+        - q: `NDArray(4,)` or `list` the input quaternions `(w, x, y, z)`
 
         Note: the quaternion does not necessarily need to be normalized.
         """
-        return Pose.from_quat_xyzw(q[[1,2,3,0]], t)
+        return Pose.from_quat_xyzw([q[1], q[2], q[3], q[0]], t)
 
 
     @staticmethod
@@ -494,9 +493,9 @@ class Pose:
 
 
     @staticmethod
-    def from_euler_angles(angles: Tuple[float] | List[float] | NDArray,
+    def from_euler_angles(angles: tuple[float] | list[float] | NDArray,
                           seq: str, degrees: Optional[bool] = False,
-                          t: NDArray | List[float] = np.zeros(3)) -> Pose:
+                          t: NDArray | list[float] = np.zeros(3)) -> Pose:
 
         """
         Get a `Pose` from 3 Euler angles.
@@ -508,11 +507,11 @@ class Pose:
         where R_x(alpha) represents a rotation of angle alpha about the x-axis.
 
         Inputs
-        - angles: `NDArray(3,)`, `Tuple` or `List` the Euler angles in radians
+        - angles: `NDArray(3,)`, `tuple` or `list` the Euler angles in radians
                   (or degrees)
-        - seq: `str` the sequence of axis of rotation. The string must contain
-               exactly 3 characters belonging to the set 'x', 'y', 'z'. Adjacent
-               axes cannot be the same.
+        - seq:    `str` the sequence of axis of rotation. The string must
+                  contain exactly 3 characters belonging to the set 'x', 'y',
+                  'z'. Adjacent axes cannot be the same.
         """
 
         if not len(seq) == 3 or not all([c in 'xyz' for c in seq]) or \
@@ -611,6 +610,12 @@ class Pose:
         return
 
 
+    @overload
+    def __mul__(self, x: NDArray) -> NDArray: ...
+
+    @overload
+    def __mul__(self, x: Pose) -> Pose: ...
+
     # Multiplication operator overload
     def __mul__(self, x: NDArray | Pose) -> NDArray | Pose:
         """
@@ -670,7 +675,7 @@ class Pose:
         R_12 = p1.R.T @ p2.R
         angle_12, axis_12 = Pose(R_12).rotation_angle_and_axis()
         angle = alpha * angle_12
-        R = p1.R @ Pose.from_rotation_angle_and_axis(angle, axis_12).R
+        R = p1.R @ Pose.from_angle_and_axis(angle, axis_12).R
         return Pose(R, t)
 
 
@@ -685,7 +690,6 @@ class Pose:
 
 
     # Visualization functions
-    @requires_package('matplotlib')
     def show(self, **args) -> Axes3D:
         """
         Visualize the `Pose` in a 3D matloptlib plot.
@@ -694,8 +698,7 @@ class Pose:
 
 
     @staticmethod
-    @requires_package('matplotlib')
-    def visualize(poses: Pose | List[Pose],
+    def visualize(poses: Pose | list[Pose],
                   axes: Optional[Axes3D] = None,
                   savefig: Optional[str] = None,
                   show: Optional[bool] = True,
@@ -705,7 +708,7 @@ class Pose:
         Visualize a Pose or a list of Poses in a 3D matloptlib plot.
 
         Inputs
-        - poses: `Pose` or `List[Pose]` pose(s) to plot
+        - poses: `Pose` or `list[Pose]` pose(s) to plot
 
         Optional Inputs
         - axes:    `Axes` matplotlib axes to plot on. If not provided, a new
@@ -792,7 +795,6 @@ class Pose:
 
 
     @staticmethod
-    @requires_package('matplotlib')
     def _plot_arrow(ax: Axes3D, origin: NDArray, vector: NDArray, **args) -> None:
         ax.plot3D([origin[0], origin[0] + vector[0]],
                     [origin[1], origin[1] + vector[1]],

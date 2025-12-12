@@ -1,6 +1,6 @@
 # Typing
 from __future__ import annotations
-from typing import Callable, Any, Tuple, NewType, Literal
+from typing import Any, Literal
 
 # Numpy
 import numpy as np
@@ -48,7 +48,6 @@ def homogenized(vectors: NDArray, fill_value: Any = 1) -> NDArray:
         dtype=vectors.dtype
     )
 
-
 def normalized(x: NDArray, axis: int = -1, norm: Literal['L1', 'L2'] = 'L2') \
     -> NDArray:
     """
@@ -76,75 +75,69 @@ def normalized(x: NDArray, axis: int = -1, norm: Literal['L1', 'L2'] = 'L2') \
         raise TypeError(f"Invalid normalization argument '{norm}.' " +
                         f"Choose 'L1' or 'L2'.")
 
-
-Model = NewType("Model", Any)
-def ransac(
-    model_fct: Callable[[NDArray], Model],
-    error_fct: Callable[[NDArray, Model], NDArray],
-    data: NDArray,
-    n_datapoints: int,
-    threshold: float,
-    outlier_ratio: float = None,
-    n_iterations: int = None
-    ) -> Tuple[Any, NDArray]:
+def lower_triangular_to_symmetric(x_flat: NDArray, n: int) -> NDArray:
     """
-    RANSAC method finding the best model while rejecting outlier data points.
+    Build symmetric matrix or matrices from flattened array(s) representing the
+    lower triangular part(s). The function assumes that each input array is of
+    dimension `n*(n + 1)/2` and returns a symmetric matrix or matrices of shape
+    `(n, n)`.
 
-    Inputs
-    - model_fct:    `Callable[[NDArray], Model]` function that finds a model
-                     given some data, i.e `model_fct(x: NDArray) -> Model`.
-    - error_fct:     `Callable[[NDArray, Model], NDArray] function that computes
-                     the error for every datapoint given a model,
-                     i.e. `error_fct(x: NDArray, model: Model) -> NDArray`.
-    - data:          `NDArray(N, ...)` the N data points used in the problem.
-    - n_datapoints:  `int` the minimum number of data points needed to estimate
-                     the model.
-    - threshold:     `float` threshold value that determines if the model fits a
-                     datapoint well or not.
-    - outlier_ratio: `float` the estimated outlier ratio. If unspecified or
-                     `None`, the `n_iterations is employed.
-    - n_iterations:  `int` the number of iterations that will be performed if
-                     the `outlier_ratio` is unspecified or `None`. If `None`, an
-                     adaptive RANSAC method will be employed.
-    Returns
-    - best_model:   `Model` the model that fits the data the best
-    - inlier_mask:  `NDArray(N, )` boolean array mask for the determined inliers
+    Inputs:
+    - x_flat: `NDArray(.., n*(n + 1)/2, )` flattened array(s) representing the
+               lower triangular part(s) of the output symmetric matrix or
+               matrices.
+    - n:      `int` dimension of the output symmetric matrix or matrices.
+
+    Returns:
+    - X:       `NDArray(..., n, n)` symmetric matrix built from the input array.
     """
+    if not x_flat.shape[-1] ==  n * (n + 1) // 2:
+        raise ValueError(
+            "Input array `x_flat` is not of the correct shape. " +
+            f"Expected (..., {n * (n + 1) // 2}), got {x_flat.shape}."
+        )
+    # Get the lower triangular indices of the matrix
+    ii = np.tril_indices(n) # (2, n*(n + 1)/2)
 
-    if len(data) < n_datapoints:
-        logger.error("Fewer datapoints than the size of the subsets needed " +
-                      "to estimate the model.")
-        raise ValueError("Fewer datapoints than the size of the subsets " +
-                         "needed to estimate the model.")
+    # Build the symmetric matrix
+    X = np.zeros((*x_flat.shape[:-1], n, n)) # (..., n, n)
+    X[..., ii[0], ii[1]] = x_flat
+    X[..., ii[1], ii[0]] = x_flat
+    return X
 
-    if outlier_ratio != None:
-        prob_success = 0.99
-        n_iterations = int(np.ceil(
-            np.log(1 - prob_success) /\
-            np.log(1 - (1 - outlier_ratio)**n_datapoints)
-        ))
-    elif n_iterations == None:
-        logger.error("Adapative RANSAC is not implemented.")
-        raise NotImplementedError("Adapative RANSAC is not implemented.")
+def extract_lower_triangular(x: NDArray) -> NDArray:
+    """
+    Flatten matrix or matrices to lower triangular part(s). The function assumes
+    that each input matrix is of dimension `(n, n)`. It returns a flattened
+    array or arrays of shape `(n*(n + 1)/2, )`.
 
-    max_n_inliers = 0
-    best_model, best_inlier_mask = None, None
-    for _ in range(n_iterations):
+    Inputs:
+    - x: `NDArray(..., n, n)` matrix or matrices.
 
-        # Pick a subset
-        subset_idxs = np.random.choice(len(data), size=n_datapoints,
-                                       replace=False)
-        data_sub = data[subset_idxs]
+    Returns:
+    - x_flat: `NDArray(..., n*(n + 1)/2, )` flattened array(s) representing the
+              lower triangular part(s) of the input matrix or matrices.
 
-        # Determine the model, get the error and set the inlier mask
-        model = model_fct(data_sub)     # Model
-        error = error_fct(data, model)  # (N, )
-        inlier_mask = error < threshold # (N, )
+    Note: the function does not verify the symmetry of the input matrix or
+          matrices. That is, the input matrix or matrices do not need to be
+          symmetric.
+    """
+    # Dimension checks
+    n = x.shape[-1]
+    if not x.shape[-2:] == (n, n):
+        raise ValueError(
+            "Input array `x` is not of the correct shape. " +
+            f"Expected (..., {n}, {n}), got {x.shape}."
+        )
 
-        # Count number of inliers and update the best model if necessary
-        n_inliers = np.sum(inlier_mask)
-        if n_inliers > max_n_inliers:
-            max_n_inliers = n_inliers
-            best_model, best_inlier_mask = model, inlier_mask
+    # Get the lower triangular indices of the matrix
+    ii = np.tril_indices(n) # (2, n*(n + 1)/2)
 
-    return best_model, best_inlier_mask
+    # Build the flattened array
+    x_flat = np.zeros((*x.shape[:-2], n * (n + 1) // 2)) # (..., n*(n + 1)/2)
+    x_flat[..., ii[0], ii[1]] = x
+    return x_flat
+
+class RuntimeUnreachableError(RuntimeError):
+    pass
+

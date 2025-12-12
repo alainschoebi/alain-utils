@@ -131,9 +131,9 @@ def image_to_marker(image: NDArray, pose: Pose, scale: float,
 
     # add points and colors to the marker
     marker.points = [Point(*triangle_pixels[i]) for i in tqdm(range(len(triangle_pixels)),
-                                                              leave=False, desc="Copying points")]
+                                                              leave=False, desc="Copying points", unit="triangle")]
     marker.colors = [ColorRGBA(*triangle_colors[i]) for i in tqdm(range(len(triangle_colors)),
-                                                                  leave=False, desc="Copying colours")]
+                                                                  leave=False, desc="Copying colours", unit="triangle")]
     assert len(marker.points) == len(marker.colors)
 
     return marker
