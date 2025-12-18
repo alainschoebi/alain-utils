@@ -13,12 +13,9 @@ from pathlib import Path
 from .decorators import requires_package
 
 # Matplotlib
-try:
-    import matplotlib
-    import matplotlib.pyplot as plt
-    from matplotlib.axes import Axes
-except ImportError:
-    pass
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 # Cython BBox
 try:
@@ -502,7 +499,6 @@ class BBox:
 
 
     # Visualization functions
-    @requires_package('matplotlib')
     def show(self, axes: Optional[Axes] = None,
              savefig: Optional[str | Path] = None, **args) -> Axes:
         """
@@ -511,7 +507,6 @@ class BBox:
         return BBox.visualize(self, axes, savefig, **args)
 
     @staticmethod
-    @requires_package('matplotlib')
     def visualize(bboxes: BBox | list[BBox],
                   axes: Optional[Axes] = None,
                   savefig: Optional[str | Path] = None,
