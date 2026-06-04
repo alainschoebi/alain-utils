@@ -1,5 +1,5 @@
 # Typing
-from typing import Optional, overload
+from typing import Optional, overload, Literal
 
 # Numpy
 import numpy as np
@@ -90,30 +90,64 @@ def prior_update(x_m: State | None, P_m: Covariance,
    return x_p, P_p
 
 @overload
-def measurement_update(x_p: None, P_p: Covariance,
-                       z: None, H: NDArray, R: Covariance,
-                       KALMAN_GAIN_FORM: bool = True,
-                       JOSEPH_FORM: bool = True,
-                       symmetry_tol: float = 1e-8,
-                       invertibility_eps: float = 1e-20) \
-                         -> tuple[None, Covariance]: ...
+def measurement_update(
+        x_p: None, P_p: Covariance,
+        z: None, H: NDArray, R: Covariance,
+        *,
+        KALMAN_GAIN_FORM: bool = True,
+        JOSEPH_FORM: bool = True,
+        symmetry_tol: float = 1e-8,
+        invertibility_eps: float = 1e-20,
+        return_kalman_gain: Literal[False] = False,
+    ) -> tuple[None, Covariance]: ...
 
 @overload
-def measurement_update(x_p: State, P_p: Covariance,
-                       z: State, H: NDArray, R: Covariance,
-                       KALMAN_GAIN_FORM: bool = True,
-                       JOSEPH_FORM: bool = True,
-                       symmetry_tol: float = 1e-8,
-                       invertibility_eps: float = 1e-20) \
-                         -> tuple[State, Covariance]: ...
+def measurement_update(
+        x_p: State, P_p: Covariance,
+        z: State, H: NDArray, R: Covariance,
+        *,
+        KALMAN_GAIN_FORM: bool = True,
+        JOSEPH_FORM: bool = True,
+        symmetry_tol: float = 1e-8,
+        invertibility_eps: float = 1e-20,
+        return_kalman_gain: Literal[False] = False,
+    ) -> tuple[State, Covariance]: ...
 
-def measurement_update(x_p: State | None, P_p: Covariance,
-                       z: NDArray | None, H: NDArray, R: Covariance,
-                       KALMAN_GAIN_FORM: Optional[bool] = True,
-                       JOSEPH_FORM: Optional[bool] = True,
-                       symmetry_tol: Optional[float] = 1e-8,
-                       invertibility_eps: Optional[float] = 1e-20) \
-                         -> tuple[State | None, Covariance]:
+@overload
+def measurement_update(
+        x_p: None, P_p: Covariance,
+        z: None, H: NDArray, R: Covariance,
+        *,
+        KALMAN_GAIN_FORM: bool = True,
+        JOSEPH_FORM: bool = True,
+        symmetry_tol: float = 1e-8,
+        invertibility_eps: float = 1e-20,
+        return_kalman_gain: Literal[True],
+    ) -> tuple[None, Covariance, NDArray]: ...
+
+@overload
+def measurement_update(
+        x_p: State, P_p: Covariance,
+        z: State, H: NDArray, R: Covariance,
+        *,
+        KALMAN_GAIN_FORM: bool = True,
+        JOSEPH_FORM: bool = True,
+        symmetry_tol: float = 1e-8,
+        invertibility_eps: float = 1e-20,
+        return_kalman_gain: Literal[True],
+    ) -> tuple[State, Covariance, NDArray]: ...
+
+def measurement_update(
+        x_p: State | None, P_p: Covariance,
+        z: NDArray | None, H: NDArray, R: Covariance,
+        *,
+        KALMAN_GAIN_FORM: bool = True,
+        JOSEPH_FORM: bool = True,
+        symmetry_tol: float = 1e-8,
+        invertibility_eps: float = 1e-20,
+        return_kalman_gain: bool = False
+    ) -> tuple[State | None, Covariance] | \
+         tuple[State | None, Covariance, NDArray]:
    """
    Measurement update of the Kalman Filter, also referred to as the a posteriori
    update.
@@ -230,5 +264,13 @@ def measurement_update(x_p: State | None, P_p: Covariance,
 
        if x_p is not None:
            x_m = x_p + P_m @ H.T @ R_inv @ (z - H @ x_p)
+
+   if return_kalman_gain:
+        if not KALMAN_GAIN_FORM:
+            raise ValueError(
+                "The Kalman gain can only be returned when using the"
+                "`KALMAN_GAIN_FORM`."
+            )
+        return x_m, P_m, K
 
    return x_m, P_m
