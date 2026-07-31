@@ -34,7 +34,7 @@ class Color:
     needed.
     """
 
-    # Predefine colors
+    # Predefined colors
     BLACK: ClassVar["Color"]
     WHITE: ClassVar["Color"]
     RED: ClassVar["Color"]
@@ -48,77 +48,78 @@ class Color:
         The `opacity`, `alpha`, or `a` arguments must always be provided as
         `float` in `[0., 1.]`.
 
-        Available constructors:
-        - Default color (red).
-            Color()
-        - RGB color with `int` values in `[0, 255]`:
-            Color(`int`, `int`, `int`)
-        - RGB color with `float` values in `[0., 1.]`:
-            Color(`float`, `float`, `float`)
-        - RGB color with `tuple` values in `[0, 255]`:
-            Color((`int`, `int`, `int`))
-        - RGB color with `tuple` values in `[0., 1.]`:
-            Color((`float`, `float`, `float`))
-        - RGB color with `list` values in `[0, 255]`:
-            Color([`int`, `int`, `int`])
-        - RGB color with `list` values in `[0., 1.]`:
-            Color([`float`, `float`, `float`])
-        - RGB color with `NDArray` values in `[0, 255]`:
-            Color(np.array([`int`, `int`, `int`]))
-        - RGB color with `NDArray` values in `[0., 1.]`:
-            Color(np.array([`float`, `float`, `float`]))
-        - RGB color with string `rgb(r, g, b)` format:
-            Color("rgb(`int`, `int`, `int`)")
-        - RGB color with string name:
-            Color("<color name>")
-        - RGB color from HSV values:
-            Color(h=`float`, s=`float`, v=`float`)
-        - RGBA colors ...
+        Available Constructors:
+            Default color (red).
+            >>> Color()
+            RGB color with `int` values in `[0, 255]`:
+            >>> Color(`int`, `int`, `int`)
+            RGB color with `float` values in `[0., 1.]`:
+            >>> Color(`float`, `float`, `float`)
+            RGB color with `tuple` values in `[0, 255]`:
+            >>> Color((`int`, `int`, `int`))
+            RGB color with `tuple` values in `[0., 1.]`:
+            >>> Color((`float`, `float`, `float`))
+            RGB color with `list` values in `[0, 255]`:
+            >>> Color([`int`, `int`, `int`])
+            RGB color with `list` values in `[0., 1.]`:
+            >>> Color([`float`, `float`, `float`])
+            RGB color with `NDArray` values in `[0, 255]`:
+            >>> Color(np.array([`int`, `int`, `int`]))
+            RGB color with `NDArray` values in `[0., 1.]`:
+            >>> Color(np.array([`float`, `float`, `float`]))
+            RGB color with string `rgb(r, g, b)` format:
+            >>> Color("rgb(`int`, `int`, `int`)")
+            RGB color with string name:
+            >>> Color("<color name>")
+            RGB color from HSV values:
+            >>> Color(h=`float`, s=`float`, v=`float`)
+            Similarly for RGBA colors...
 
-        Note: the keyword arguments `opacity`, `alpha` and `a` are aliases for
-              the opacity value. Only one of them should be provided.
+        Note:
+            The keyword arguments `opacity`, `alpha` and `a` are aliases for the
+            opacity value. Only one of them should be provided.
 
-        Non-exhaustive list of example types:
-        - Color()
-        - Color(opacity=0.5)
-        - Color("red")
-        - Color("red", opacity=0.5)
-        - Color(234, 12, 120)
-        - Color(234, 12, 120, 0.5)
-        - Color(234, 12, 120, opacity=0.5)
-        - Color(0.8, 0.1, 0.8)
-        - Color(0.8, 0.1, 0.8, 0.5)
-        - Color(0.8, 0.1, 0.8, opacity=0.5)
-        - Color((234, 12, 120))
-        - Color((234, 12, 120, 0.5))
-        - Color((234, 12, 120), opacity=0.5)
-        - Color((0.8, 0.1, 0.8))
-        - Color((0.8, 0.1, 0.8, 0.5))
-        - Color((0.8, 0.1, 0.8), opacity=0.5)
-        - Color([234, 12, 120])
-        - Color([234, 12, 120, 0.5])
-        - Color([234, 12, 120], opacity=0.5)
-        - Color([0.8, 0.1, 0.8])
-        - Color([0.8, 0.1, 0.8, 0.5])
-        - Color([0.8, 0.1, 0.8], opacity=0.5)
-        - Color(np.array([234, 12, 120]))
-        - Color(np.array([234, 12, 120]), opacity=0.5)
-        - Color(np.array([0.8, 0.1, 0.8]))
-        - Color(np.array([0.8, 0.1, 0.8, 0.5]))
-        - Color(np.array([0.8, 0.1, 0.8]), opacity=0.5)
-        - Color("rgb(255, 12, 210)")
-        - Color("rgba(255, 255, 231, 0.5)")
-        - Color("rgb(255, 12, 120)", opacity=0.5)
-        - Color(r=255, g=12, b=120)
-        - Color(r=255, g=12, b=120, a=0.5)
-        - Color(r=255, g=12, b=120, opacity=0.5)
-        - Color(red=255, green=12, blue=120)
-        - Color(red=255, green=12, blue=120, alpha=0.5)
-        - Color(red=255, green=12, blue=120, opacity=0.5)
-        - Color(h=0.8, s=0.1, v=0.8)
-        - Color(h=0.8, s=0.1, v=0.8, opacity=0.5)
-        - Color(hue=0.8, saturation=0.1, value=0.8)
-        - Color(hue=0.8, saturation=0.1, value=0.8, opacity=0.5)
+        Examples:
+            >>> Color()
+            >>> Color(opacity=0.5)
+            >>> Color("red")
+            >>> Color("red", opacity=0.5)
+            >>> Color(234, 12, 120)
+            >>> Color(234, 12, 120, 0.5)
+            >>> Color(234, 12, 120, opacity=0.5)
+            >>> Color(0.8, 0.1, 0.8)
+            >>> Color(0.8, 0.1, 0.8, 0.5)
+            >>> Color(0.8, 0.1, 0.8, opacity=0.5)
+            >>> Color((234, 12, 120))
+            >>> Color((234, 12, 120, 0.5))
+            >>> Color((234, 12, 120), opacity=0.5)
+            >>> Color((0.8, 0.1, 0.8))
+            >>> Color((0.8, 0.1, 0.8, 0.5))
+            >>> Color((0.8, 0.1, 0.8), opacity=0.5)
+            >>> Color([234, 12, 120])
+            >>> Color([234, 12, 120, 0.5])
+            >>> Color([234, 12, 120], opacity=0.5)
+            >>> Color([0.8, 0.1, 0.8])
+            >>> Color([0.8, 0.1, 0.8, 0.5])
+            >>> Color([0.8, 0.1, 0.8], opacity=0.5)
+            >>> Color(np.array([234, 12, 120]))
+            >>> Color(np.array([234, 12, 120]), opacity=0.5)
+            >>> Color(np.array([0.8, 0.1, 0.8]))
+            >>> Color(np.array([0.8, 0.1, 0.8, 0.5]))
+            >>> Color(np.array([0.8, 0.1, 0.8]), opacity=0.5)
+            >>> Color("rgb(255, 12, 210)")
+            >>> Color("rgba(255, 255, 231, 0.5)")
+            >>> Color("rgb(255, 12, 120)", opacity=0.5)
+            >>> Color(r=255, g=12, b=120)
+            >>> Color(r=255, g=12, b=120, a=0.5)
+            >>> Color(r=255, g=12, b=120, opacity=0.5)
+            >>> Color(red=255, green=12, blue=120)
+            >>> Color(red=255, green=12, blue=120, alpha=0.5)
+            >>> Color(red=255, green=12, blue=120, opacity=0.5)
+            >>> Color(h=0.8, s=0.1, v=0.8)
+            >>> Color(h=0.8, s=0.1, v=0.8, opacity=0.5)
+            >>> Color(hue=0.8, saturation=0.1, value=0.8)
+            >>> Color(hue=0.8, saturation=0.1, value=0.8, opacity=0.5)
         """
 
         self.__a = None
@@ -635,10 +636,12 @@ class Color:
         """
         Return a new `Color` with the same RGB values and the provided opacity.
 
-        Note: If the color already has an alpha value, it will be replaced by
-              the provided opacity.
-        Note: If the color does not have an alpha value and no opacity is
-              provided, a ValueError is raised.
+        Note:
+            If the color already has an alpha value, it will be replaced by the
+            provided opacity.
+        Note:
+            If the color does not have an alpha value and no opacity is
+            provided, a ValueError is raised.
         """
         if not self.has_alpha and opacity is None:
             raise ValueError(
@@ -695,6 +698,7 @@ class Color:
         ax.axis('off')
         plt.show()
 
+# Define base colors
 Color.BLACK = Color("black")
 Color.WHITE = Color("white")
 Color.RED = Color("red")

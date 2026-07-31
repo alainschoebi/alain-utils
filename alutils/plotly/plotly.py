@@ -10,7 +10,14 @@ try:
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 except ImportError:
-    pass
+    go = None
+
+# Kaleido
+try:
+    import kaleido
+except ImportError:
+    kaleido = None
+
 
 # Utils
 from alutils import Color
@@ -38,76 +45,71 @@ def build_plotly_plot(
     Builds a plotly plot from a 2D list of dictionaries. Each dictionary
     describes a subplot of the plot.
 
-    Inputs
-    ------
-    plot: `list[list[dict[str, Any]]]`
-        The 2D list of dictionaries describing the plot.
+    Args:
+        plot: `list[list[dict[str, Any]]]` the two-dimensional list of
+              dictionaries describing the plot.
 
-    Keys
-    ----
+    Mandatory Keys:
     Each entry in the 2D list of dictionaries MUST have the following keys:
 
-    title: `str`
-        The title of the subplot.
-    traces: `go.Scatter | go.Image ... | list[go.Scatter | go.Image | ...]`
-        The trace(s) of the subplot.
+        title: `str` the title of the subplot.
+        traces: `go.Scatter | go.Image ... | list[go.Scatter | go.Image | ...]`
+                the trace(s) of the subplot.
 
+    Optional Keys:
     Each entry in the 2D list of dictionaries CAN have the optional keys:
 
-    rowspan: `int`
-        The number of rows spanned by the subplot.
-    colspan: `int`
-        the number of columns spanned by the subplot.
-    xlim: `list[float, float]`
-        the x-axis limits.
-    ylim: `list[float, float]`
-        the y-axis limits.
-    secondary_ylim: `list[float, float]`
-        the secondary y-axis limits.
-    equal_aspect_ratio: `bool`
-        whether to use equal aspect ratio for the subplot.
-    viewpoint: `dict[str, float]`
-        the viewpoint of the 3D plot.
-    xlabel: `str`
-        the label of the x-axis.
-    ylabel: `str`
-        the label of the y-axis.
-    tick_format_x: `str`
-        the tick format for the x-axis.
-    tick_format_y: `str`
-        the tick format for the y-axis.
-    tick_format_secondary_y: `str`
-        the tick format for the secondary y-axis.
-    log_scale_x: `bool`
-        whether to use a logarithmic scale for the x-axis.
-    log_scale_y: `bool`
-        whether to use a logarithmic scale for the y-axis.
-    secondary_log_scale_y: `bool`
-        whether to use a logarithmic scale for the secondary y-axis.
-    secondary_ylabel: `str`
-        the label of the secondary y-axis.
-    secondary_y_axis_trace_idx: `list[int]`
-        the indices of which traces should be plotted on the secondary y-axis.
-    shared_x_axis_identifier: `str`
-        the name of the shared x-axis. Note that the name only serves as
-        identification and the actual string is irrelevant.
-    shared_y_axis_identifier: `str`
-        the name of the shared y-axis. Note that the name only serves as
-        identification and the actual string is irrelevant.
-    # TODO DO SHARED X-Y AXES joint
+        rowspan: `int`
+            The number of rows spanned by the subplot.
+        colspan: `int`
+            the number of columns spanned by the subplot.
+        xlim: `list[float, float]`
+            the x-axis limits.
+        ylim: `list[float, float]`
+            the y-axis limits.
+        secondary_ylim: `list[float, float]`
+            the secondary y-axis limits.
+        equal_aspect_ratio: `bool`
+            whether to use equal aspect ratio for the subplot.
+        viewpoint: `dict[str, float]`
+            the viewpoint of the 3D plot.
+        xlabel: `str`
+            the label of the x-axis.
+        ylabel: `str`
+            the label of the y-axis.
+        tick_format_x: `str`
+            the tick format for the x-axis.
+        tick_format_y: `str`
+            the tick format for the y-axis.
+        tick_format_secondary_y: `str`
+            the tick format for the secondary y-axis.
+        log_scale_x: `bool`
+            whether to use a logarithmic scale for the x-axis.
+        log_scale_y: `bool`
+            whether to use a logarithmic scale for the y-axis.
+        secondary_log_scale_y: `bool`
+            whether to use a logarithmic scale for the secondary y-axis.
+        secondary_ylabel: `str`
+            the label of the secondary y-axis.
+        secondary_y_axis_trace_idx: `list[int]`
+            the indices of which traces should be plotted on the secondary y-axis.
+        shared_x_axis_identifier: `str`
+            the name of the shared x-axis. Note that the name only serves as
+            identification and the actual string is irrelevant.
+        shared_y_axis_identifier: `str`
+            the name of the shared y-axis. Note that the name only serves as
+            identification and the actual string is irrelevant.
+        # TODO DO SHARED X-Y AXES joint
 
-    Optional Inputs
-    ---------------
-    title: `str`
-        The title of the plot.
-    open_browser: `bool`
-        Whether to open the plot in the browser. Default is `True`.
-    output_html: `str | Path | None`
-        The path to save the plot as an HTML file. Default is `None`.
-    hover_mode: `x | y | x unified | y unified | closest | False`
-        Hover mode for all the subplot. Default is `x unified`.
-    bar_mode: TODO
-        TODO
+    Optional Args:
+        title: `str` the title of the plot.
+        open_browser: `bool` whether to open the plot in the browser. Default is
+                      `True`.
+        output_html: `str | Path | None` the path to save the plot as an HTML
+                      file. Default is `None`.
+        hover_mode: `x | y | x unified | y unified | closest | False` hover mode
+                    of all the subplots. Default is `x unified`.
+        # TODO bar_mode
     """
 
     rows = len(plot)
@@ -479,9 +481,7 @@ def build_plotly_plot(
 
     # Save SVG file
     if output_svg is not None:
-        try:
-            import kaleido
-        except ImportError as e:
+        if kaleido is None:
             raise ImportError(
                 "The package `kaleido` is required to export Plotly plots as "
                 "SVG files. Please install it using `pip install kaleido`."

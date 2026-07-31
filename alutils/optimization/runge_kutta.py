@@ -6,6 +6,7 @@ import numpy as np
 
 Point = TypeVar("Point", bound=Union[np.ndarray, float])
 
+
 def rk4_step(
         f: Callable[[Point, float], Point],
         y0: Point,
@@ -13,18 +14,18 @@ def rk4_step(
         dt: float
     ) -> Point:
     """
-    Runge-Kutta 4th order integration step for the differential equation
-        dy(t)/dt = f(y, t).
+    Perform a fourth-order Runge-Kutta integration step.
+
+    The integrated differential equation is `dy(t) / dt = f(y, t)`.
 
     Args:
-        f (Callable[[float, Point], Point]): The differential function f(t, y)
-                                             to integrate.
-        y0 (Point): The initial state.
-        t0 (float): The initial time.
-        dt (float): The time step.
+        f: `Callable[[Point, float], Point]` differential function `f(y, t)`
+        y0: `Point` initial state
+        t0: `float` initial time
+        dt: `float` integration time step
 
     Returns:
-        Point: The state `y` at time `t0 + dt` after integration.
+        y: `Point` state at time `t0 + dt` after integration
     """
 
     k1 = f(                          y0,           t0)

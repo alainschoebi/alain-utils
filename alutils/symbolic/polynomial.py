@@ -2,14 +2,15 @@
 try:
     import sympy as sp
 except ImportError:
-    pass
+    sp = None
 
 # Utils
 from ..decorators import requires_package
 
 @requires_package("sympy")
 def quadratic_polynomial_Abc(
-        expr: sp.Expr, vars: list[sp.Symbol] | tuple[sp.Symbol],
+        expr: sp.Expr,
+        vars: list[sp.Symbol] | tuple[sp.Symbol],
     ) -> tuple[sp.Matrix, sp.Matrix, sp.Expr]:
     """
     Given a symbolic quadratic expression depending on `n` variables, this
@@ -17,18 +18,19 @@ def quadratic_polynomial_Abc(
        `1/2 x^T A x + b^T x + c`,
     with matrix `A`, vector `b` and scalar `c`.
 
-    Inputs
-    - expr:  symbolic expression of the quadratic polynomial
-    - vars:  list or tuple of `n` variables (symbols) on which the polynomial
-             depends, e.g. [x_1, x_2, ..., x_n].
+    Args:
+        expr:  symbolic expression of the quadratic polynomial
+        vars:  list or tuple of `n` variables (symbols) on which the polynomial
+               depends, e.g. [x_1, x_2, ..., x_n].
 
-    Returns
-    - A:     (n, n) matrix of the quadratic form
-    - b:     (n, 1) vector of the linear form
-    - c:     scalar constant term
+    Returns:
+        A: `(n, n)` matrix of the quadratic form
+        b: `(n, 1)` vector of the linear form
+        c: scalar constant term
 
-    Note: the expression can also be parametrized by other symbolic variables
-          that are not included in the polynomial variables `vars`.
+    Note:
+        The expression can also be parametrized by other symbolic variables that
+        are not included in the polynomial variables `vars`.
     """
     # Build polynomial
     poly = sp.Poly(expr, *vars)

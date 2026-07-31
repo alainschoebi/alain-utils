@@ -8,14 +8,15 @@ def update_config_dict(config_to_update: dict,
     """
     Set partial configuration.
 
-    Inputs
-    - config_to_edit: `dict` base configuration which will be updated
-    - config_to_add:  `dict` partial configuration to add
-    - default_config: `dict` default configuration used for checking the
-                       types and names of the arguments.
+    Args:
+        config_to_edit: `dict` base configuration which will be updated
+        config_to_add:  `dict` partial configuration to add
+        default_config: `dict` default configuration used for checking the
+                        types and names of the arguments.
 
-    Note: the values of the `config_to_add` configuration are not being copied.
-          That is, the `config_to_update` will contain the same objects.
+    Note:
+        The values of the `config_to_add` configuration are not being copied.
+        That is, the `config_to_update` will contain the same objects.
     """
 
     if not isinstance(config_to_update, dict) or \

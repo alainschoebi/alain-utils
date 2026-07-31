@@ -45,28 +45,37 @@ def generate_video(
     """
     Generate a video from a list of images using imageio.
 
-    Inputs
-    - images: `list[Path | str] list of images to be included in the video.
-    - video_filename: `str | Path` name of the output video file.
+    Args:
+        images: `list[Path]` or `list[str]` images to be included in the video
+        video_filename: `str` or `Path` name of the output video file
 
-    Partially Required Inputs
-    - fps: `int` frame rate per seconds of the video.
-    - duration: `float` duration of the video in seconds.
+    Partially Required Args:
+        fps: `int` frame rate per second of the video. Default is `None`. Either
+             `fps` or `duration` must be provided.
+        duration: `float` duration of the video in seconds. Default is `None`.
 
-    Optional Inputs
-    - padding_color: `Color` color to be used for padding the images. If None,
-                     the images will be padded with the edge color of the image.
-    - no_resize_warning: `bool` if True, no warning will be raised if the image
-                         dimensions are not divisible by the macro block size.
+    Optional Args:
+        padding_color: `Color` color used to pad the images. If `None`, the
+                       images are padded with the edge color of the image.
+                       Default is `None`.
+        no_resize_warning: `bool` if `True`, suppress the warning when the image
+                           dimensions are not divisible by the macro block size.
+                           Default is `False`.
 
-    Note: ImageIO automatically resizes the images such that the dimensions are
-          divisible by the `macro_block_size`. This is done to ensure that the
-          videos are properly encoded and compatible with most video players.
+    Raises:
+        ValueError: the images are invalid, their dimensions are inconsistent,
+                    or neither `fps` nor `duration` is provided
+
+    Note:
+        ImageIO automatically resizes the images such that the dimensions are
+        divisible by the `macro_block_size`. This ensures that the videos are
+        properly encoded and compatible with most video players.
     """
 
     if len(images) == 0:
-        logger.warning("The images list contains zero images. " +
-                       "Not generating any video.")
+        logger.warning(
+            "The images list contains zero images. Not generating any video."
+        )
         return
 
     # Get the image dimensions
@@ -147,30 +156,33 @@ def generate_video_from_folder(
     """
     Generate a video from all images within a given folder using imageio.
 
-    Inputs
-    - folder:         `str | Path` path to the folder containing images to be
-                      included in the video.
-    - video_filename: `str | Path` name of the output video file.
-    - images_prefix:  `str` prefix of the images to be included in the video.
+    Args:
+        folder: `str` or `Path` path to the folder containing images to be
+                included in the video
+        video_filename: `str` or `Path` name of the output video file
 
-    Partially Required Inputs
-    - fps: `int` frame rate per seconds of the video.
-    - duration: `float` duration of the video in seconds.
+    Partially Required Args:
+        images_prefix: `str` prefix of the images to be included in the video.
+                       Default is an empty string.
+        fps: `int` frame rate per second of the video. Default is `None`.
 
-    Optional Inputs
-    - padding_color: `Color` color to be used for padding the images. If None,
-                     the images will be padded with the edge color of the image.
-    - no_resize_warning: `bool` if True, no warning will be raised if the image
-                         dimensions are not divisible by the macro block size.
-    - sorting:          `lexicographic | natural` sorting method for the images.
-                        Default is "natural", which sorts the images in a
-                        human-friendly way (e.g., "image1", "image2", ...,
-                        "image10") instead of lexicographic order
-                        ("image1", "image10", "image2", ...).
-
-    Note: ImageIO automatically resizes the images such that the dimensions are
-          divisible by the `macro_block_size`. This is done to ensure that the
-          videos are properly encoded and compatible with most video players.
+    Optional Args:
+        duration: `float` duration of the video in seconds. Default is `None`.
+        padding_color: `Color` color used to pad the images. If `None`, the
+                       images are padded with the edge color of the image.
+                       Default is `None`.
+        no_resize_warning: `bool` if `True`, suppress the warning when the image
+                           dimensions are not divisible by the macro block size.
+                           Default is `False`.
+        sorting: `"lexicographic"` or `"natural"` sorting method for the images.
+                 Default is `"natural"`, which sorts the images in a
+                 human-friendly way (e.g., "image1", "image2", "image10")
+                 instead of lexicographic order ("image1", "image10",
+                 "image2").
+    Note:
+        ImageIO automatically resizes the images such that the dimensions are
+        divisible by the `macro_block_size`. This ensures that the videos are
+        properly encoded and compatible with most video players.
     """
     # Folder validation
     folder = Path(folder)
@@ -216,6 +228,7 @@ def generate_video_from_folder(
 
 @requires_package('imageio', 'tqdm')
 def main():
+    """ Command-line interface for video generation. """
     parser = argparse.ArgumentParser(description="Generate a video from images.")
     parser.add_argument(
         "i", type=str, help="Folder containing images."

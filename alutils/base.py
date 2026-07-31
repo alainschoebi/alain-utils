@@ -16,11 +16,11 @@ def dehomogenized(vectors: NDArray) -> NDArray:
     element of each vector and returning a d-dimensional homogeneous vectors in
     matrix of size (..., d).
 
-    Inputs
-    - vectors: `NDArray(..., d + 1)` homogeneous input vectors
+    Args:
+        vectors: `NDArray(..., d + 1)` homogeneous input vectors
 
-    Returns
-    - dehomogenized_vectors: `NDArray(..., d)` dehomogenized vectors
+    Returns:
+        dehomogenized_vectors: `NDArray(..., d)` dehomogenized vectors
     """
     return vectors[..., :-1] / vectors[..., -1:]
 
@@ -30,15 +30,15 @@ def homogenized(vectors: NDArray, fill_value: Any = 1) -> NDArray:
     homogeneous vectors in matrix of size (..., d + 1) by appending a `1` to the
     last dimension. If specified, the `fill_value` will be used instead of `1`.
 
-    Inputs
-    - vectors: `NDArray(..., d)` input vectors
+    Args:
+        vectors: `NDArray(..., d)` input vectors
 
-    Optional Inputs
-    - fill_value: `Any` value to fill the last dimension of the vectors. Default
-                   is `1`.
+    Optional Args:
+        fill_value: `Any` value to fill the last dimension of the vectors.
+                    Default is `1`.
 
-    Returns
-    - homogenized_vectors: `NDArray(..., d + 1)` homogenized vectors
+    Returns:
+        homogenized_vectors: `NDArray(..., d + 1)` homogenized vectors
     """
     return np.concatenate(
         (vectors, np.full(vectors.shape[:-1],
@@ -54,13 +54,13 @@ def normalized(x: NDArray, axis: int = -1, norm: Literal['L1', 'L2'] = 'L2') \
     Normalize an array along the provided axis. By default the normalization is
     perfomed along the last axis.
 
-    Inputs
-    - x: `NDArray` input array
+    Args:
+        x: `NDArray` input array
 
-    Optional Inputs
-    - axis: `int` axis along which to normalize the array. Default is `-1`.
-    - norm: `Literal['L1', 'L2']` type of normalization to perform. Default is
-            `L2`.
+    Optional Args:
+        axis: `int` axis along which to normalize the array. Default is `-1`.
+        norm: `Literal['L1', 'L2']` type of normalization to perform. Default is
+                `L2`.
 
     Returns
     - normalized_x: `NDArray` normalized array
@@ -82,14 +82,14 @@ def lower_triangular_to_symmetric(x_flat: NDArray, n: int) -> NDArray:
     dimension `n*(n + 1)/2` and returns a symmetric matrix or matrices of shape
     `(n, n)`.
 
-    Inputs:
-    - x_flat: `NDArray(.., n*(n + 1)/2, )` flattened array(s) representing the
-               lower triangular part(s) of the output symmetric matrix or
-               matrices.
-    - n:      `int` dimension of the output symmetric matrix or matrices.
+    Args:
+        x_flat: `NDArray(.., n*(n + 1)/2, )` flattened array(s) representing the
+                lower triangular part(s) of the output symmetric matrix or
+                matrices.
+        n: `int` dimension of the output symmetric matrix or matrices.
 
     Returns:
-    - X:       `NDArray(..., n, n)` symmetric matrix built from the input array.
+        X: `NDArray(..., n, n)` symmetric matrix built from the input array.
     """
     if not x_flat.shape[-1] ==  n * (n + 1) // 2:
         raise ValueError(
@@ -111,16 +111,17 @@ def extract_lower_triangular(x: NDArray) -> NDArray:
     that each input matrix is of dimension `(n, n)`. It returns a flattened
     array or arrays of shape `(n*(n + 1)/2, )`.
 
-    Inputs:
-    - x: `NDArray(..., n, n)` matrix or matrices.
+    Args:
+        x: `NDArray(..., n, n)` matrix or matrices.
 
     Returns:
-    - x_flat: `NDArray(..., n*(n + 1)/2, )` flattened array(s) representing the
-              lower triangular part(s) of the input matrix or matrices.
+        x_flat: `NDArray(..., n*(n + 1)/2, )` flattened array(s) representing
+                the lower triangular part(s) of the input matrix or matrices.
 
-    Note: the function does not verify the symmetry of the input matrix or
-          matrices. That is, the input matrix or matrices do not need to be
-          symmetric.
+    Note:
+        The function does not verify the symmetry of the input matrix or
+        matrices. That is, the input matrix or matrices do not need to be
+        symmetric.
     """
     # Dimension checks
     n = x.shape[-1]
@@ -140,4 +141,3 @@ def extract_lower_triangular(x: NDArray) -> NDArray:
 
 class RuntimeUnreachableError(RuntimeError):
     pass
-

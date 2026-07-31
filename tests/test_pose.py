@@ -18,9 +18,8 @@ except ImportError:
 # COLMAP
 try:
     import pycolmap
-    COLMAP_AVAILABLE = True
 except ImportError:
-    COLMAP_AVAILABLE = False
+    pycolmap = None
 
 # Logging
 from alutils import get_logger
@@ -127,7 +126,7 @@ if ROS_AVAILABLE:
         assert 78 == 1
 
 # TODO: to be fixed
-if COLMAP_AVAILABLE and False:
+if False:
     def test_colmap():
         for _ in range(100):
             pose = Pose.random()

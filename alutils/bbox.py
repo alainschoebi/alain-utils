@@ -214,8 +214,8 @@ class BBox:
           - in a CCW manner when the x-axis points right and the y-axis down
           - in a CW manner when the x-axis points right and the y-axis up
 
-        Returns
-        - corners: `NDArray(4, 2)` array containing the four corners
+        Returns:
+            corners: `NDArray(4, 2)` array containing the four corners
         """
         return np.array([[self.x1, self.y1],
                          [self.x1, self.y2],
@@ -313,19 +313,19 @@ class BBox:
         """
         Compute the intersection between two `BBox`.
 
-        Inputs
-        - bbox_1: `BBox` the first bounding box
-        - bbox_2: `BBox` the second bounding box
+        Args:
+            bbox_1: `BBox` the first bounding box
+            bbox_2: `BBox` the second bounding box
 
-        Optional inputs
-        - intersect_check: `bool` whether to check if the two `BBox` intersect
-                           or not. If set to `True` the function will raise an
-                           error if the two `BBox` do not intersect. If set to
-                           `False`, the function will return a `BBox` even if
-                           the two `BBox` do not intersect. Default is `True`.
+        Optional Args:
+            intersect_check: `bool` whether to check if the two `BBox` intersect
+                             or not. If set to `True` the function will raise an
+                             error if the two `BBox` do not intersect. If set to
+                             `False`, the function will return a `BBox` even if
+                             the two `BBox` do not intersect. Default is `True`.
 
-        Returns
-        - intersection: `BBox` the intersection between the two BBoxes
+        Returns:
+            intersection: `BBox` the intersection between the two BBoxes
         """
         if intersect_check and not BBox.intersect(bbox_1, bbox_2):
             raise ValueError("The BBoxes do not intersect.")
@@ -340,18 +340,18 @@ class BBox:
         """
         Compute the intersection between two `BBox`.
 
-        Inputs
-        - bbox: `BBox` the other BBox to intersect with
+        Args:
+            bbox: `BBox` the other BBox to intersect with
 
-        Optional inputs
-        - intersect_check: `bool` whether to check if the two `BBox` intersect
-                           or not. If set to `True` the function will raise an
-                           error if the two `BBox` do not intersect. If set to
-                           `False`, the function will return a `BBox` even if
-                           the two `BBox` do not intersect. Default is `True`.
+        Optional Args:
+            intersect_check: `bool` whether to check if the two `BBox` intersect
+                             or not. If set to `True` the function will raise an
+                             error if the two `BBox` do not intersect. If set to
+                             `False`, the function will return a `BBox` even if
+                             the two `BBox` do not intersect. Default is `True`.
 
-        Returns
-        - intersection: `BBox` the intersection between the two BBoxes
+        Returns:
+            intersection: `BBox` the intersection between the two BBoxes
         """
         return BBox.intersection(self, bbox, intersect_check=intersect_check)
 
@@ -360,7 +360,7 @@ class BBox:
             self,
             other: tuple[float, float] | list[float] | NDArray | BBox
         ) -> bool:
-        # TODO: add support for multiple points, i.e. list of tuples or arrays
+        # TODO: add support for multiple points, i.e., list of tuples or arrays
         if isinstance(other, tuple):
             if not len(other) == 2:
                 logger.error(
@@ -455,8 +455,8 @@ class BBox:
         """
         Scale the bounding box by a scalar.
 
-        Inputs
-        - scale: `float` or `int` scale value
+        Args:
+            scale: `float` or `int` scale value
         """
         if not isinstance(scale, (int, float)):
             raise NotImplementedError(f"BBox multiplication with type " +
@@ -470,8 +470,8 @@ class BBox:
         """
         Scale the bounding box by a scalar.
 
-        Inputs
-        - scale: `float` or `int` scale value
+        Args:
+            scale: `float` or `int` scale value
         """
         return self.__mul__(scale)
 
@@ -483,12 +483,12 @@ class BBox:
         """
         Compute the Intersection-over-Union (IoU) between two BBoxes.
 
-        Inputs
-        - b_1: `BBox`
-        - b_2: `BBox`
+        Args:
+            b_1: `BBox`
+            b_2: `BBox`
 
-        Returns
-        - iou: `float` the IoU between BBox b_1 and BBox b_2
+        Returns:
+            iou: `float` the IoU between BBox b_1 and BBox b_2
         """
         # Format for cython: xyxy coordinates with `-1` subtracted for the
         # bottom right corner coordinates
@@ -521,20 +521,20 @@ class BBox:
         """
         Visualize a BBox or a list of BBoxes in a matloptlib plot.
 
-        Inputs
-        - bboxes: list of `BBox` to plot
+        Args:
+            bboxes: list of `BBox` to plot
 
-        Optional Inputs
-        - axes:      `Axes` matplotlib axes to plot on. If not provided, a new
-                     figure will be created.
-        - show:      `bool` whether to show the plot or not. Default is True. If
-                     axes are provided, the plot will not be shown. If savefig
-                     is provided, the plot will not be shown.
-        - savefig:   `str` or `Path` path to save the figure. By default the
+        Optional Args:
+            axes: `Axes` matplotlib axes to plot on. If not provided, a new
+                  figure will be created.
+            show: `bool` whether to show the plot or not. Default is True. If
+                  axes are provided, the plot will not be shown. If `savefig` is
+                  provided, the plot will not be shown.
+            savefig: `str` or `Path` path to save the figure. By default the
                      figure is not being saved.
-        - show_text: `bool` whether to show the label of the BBoxes or not.
-        - color:     `NDArray(3,)` color of the BBoxes.
-        - alpha:     `float` transparency of the BBoxes.
+            show_text: `bool` whether to show the label of the BBoxes or not.
+            color: `NDArray(3,)` color of the BBoxes.
+            alpha: `float` transparency of the BBoxes.
         """
 
         # Assertions
@@ -555,6 +555,7 @@ class BBox:
             show = False
 
         # No axes provided
+        fig = None
         if axes is None:
             # Create figure
             fig = plt.figure()
@@ -612,9 +613,9 @@ class BBox:
                 hasattr(bbox, "label") or hasattr(bbox, "name")):
                 label = i
                 if hasattr(bbox, "name"):
-                    label = bbox.name
+                    label = str(bbox.name) # type: ignore
                 elif hasattr(bbox, "label"):
-                    label = bbox.label
+                    label = str(bbox.label) # type: ignore
                 ax.text(*bbox.center(), label, ha='center', va='center',
                         alpha=alpha, color=np.array(c) * 0.7,
                         fontsize=12)
@@ -627,6 +628,7 @@ class BBox:
         if show: plt.show()
 
         # Save figure
+        assert fig is not None
         if savefig: fig.savefig(savefig)
 
         return ax

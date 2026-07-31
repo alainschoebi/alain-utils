@@ -7,9 +7,8 @@ import numpy as np
 # Cython BBox
 try:
     import cython_bbox
-    CYTHON_BBOX_AVAILABLE = True
 except ImportError:
-    CYTHON_BBOX_AVAILABLE = False
+    cython_bbox = None
     pass
 
 # Utils
@@ -30,7 +29,7 @@ def test_general():
         with pytest.raises(Exception): bbox.x = 9
         with pytest.raises(Exception): b = bbox * -2
 
-if CYTHON_BBOX_AVAILABLE:
+if cython_bbox is not None:
     def test_cython():
 
         for _ in range(100):

@@ -25,12 +25,28 @@ from alutils.bbox import BBox
 from alutils.loggers import get_logger
 logger = get_logger(__name__)
 
+
 def array_to_latex(
         array: NDArray,
         *,
         decimals: int = 2,
         max_dimension: int | None = None,
     ) -> str:
+    """
+    Convert a NumPy array to a LaTeX vector or matrix representation.
+
+    Args:
+        array: `NDArray` array to convert
+
+    Optional Args:
+        decimals: `int` number of decimal places to display. Default is `2`.
+        max_dimension: `int` maximum dimension to display explicitly. Larger
+                       arrays are represented by their shape. Default is
+                       `None`.
+
+    Returns:
+        latex: `str` LaTeX representation of the array
+    """
     if not isinstance(array, np.ndarray):
         raise TypeError(f"Expected input `array` to be of type `NDArray`, " +
                         f"but found `{type(array)}`.")
@@ -53,19 +69,20 @@ def array_to_latex(
     else:
         raise NotImplementedError(f"This error should not be raised.")
 
+
 @requires_package("shapely")
 def get_2d_boundary(vertices: NDArray, faces: NDArray) -> list[NDArray]:
     """
     Computes the 2D boundary of a 2D mesh defined by its vertices and faces.
 
-    Inputs
-    - vertices: `NDArray(N, 2)` the 2D vertices of the mesh.
-    - faces: `NDArray(M, 3)` of integers representing the faces of the mesh.
+    Args:
+        vertices: `NDArray(N, 2)` 2D vertices of the mesh
+        faces: `NDArray(M, 3)` integer indices representing the mesh faces
 
-    Returns
-    - boundaries: `list[NDArray(N, 2)]` the 2D boundaries of the mesh. Since the
-                  mesh can be composed of multiple disjoint parts, the
-                  boundaries are returned as a list of 2D vertices.
+    Returns:
+        boundaries: `list[NDArray(N, 2)]` 2D mesh boundaries. Since the mesh
+                    can contain multiple disjoint parts, each boundary is
+                    returned as a separate array of 2D vertices.
     """
     assert isinstance(vertices, np.ndarray) and isinstance(faces, np.ndarray)
     if len(vertices) == 0 or len(faces) == 0:
@@ -99,19 +116,24 @@ def gaussian_1d_traces(
     mu: float, var: float, *values: float, S: int = 100,
     color: Optional[str] = 'cyan') -> list[go.Contour | go.Scatter]:
     """
-    Generates the traces for a 1D Gaussian distribution. It plots the PDF.
+    Generate Plotly traces for the PDF of a 1D Gaussian distribution.
 
-    The function only draws the contour on a square image of size `H x W`, and
-    `S` points are used to draw the ellipses.
+    The PDF is evaluated at `S` evenly spaced points within three standard
+    deviations of the mean. Vertical lines mark the mean and any supplied
+    values.
 
-    Inputs:
-    - mu: `float` the mean of the Gaussian distribution.
-    - cov: `float` the variance of the Gaussian distribution.
-    - *values: `float` any number of x-values to plot on the PDF.
-    - S: `int` the number of points used to draw the PDF.
+    Args:
+        mu: `float` mean of the Gaussian distribution
+        var: `float` variance of the Gaussian distribution
+        *values: `float` x-values to mark on the PDF
+
+    Optional Args:
+        S: `int` number of points used to draw the PDF. Default is `100`.
+        color: `str` color used for the PDF and mean traces. Default is
+               `'cyan'`.
 
     Returns:
-    - traces: `list[go.Scatter]` the traces of the Gaussian distribution.
+        traces: `list[go.Scatter]` traces of the Gaussian distribution
     """
 
     if var <= 0:
@@ -177,33 +199,35 @@ def gaussian_2d_traces(
     colorscale: str | list = "Viridis"
     ) -> list[go.Contour | go.Scatter]:
     """
-    Generates the traces for a 2D Gaussian distribution. It plots the mean, the
-    1 standard deviation and the 2 standard deviation ellipses, and the contour
-    of the Gaussian distribution.
+    Generate Plotly traces for a 2D Gaussian distribution.
+
+    The traces contain the mean, the one- and two-standard-deviation ellipses,
+    and a contour map of the Gaussian distribution.
 
     The function only draws the contour on a square image of size `H x W`. If
     `output_size` is `None`, i.e., the dimensions `H x W` are unknown, then the
     contour will only be plotted within the 2 standard deviation ellipse.
 
-    Inputs:
-    - mu: `NDArray(2,)` the mean of the Gaussian distribution.
-    - cov: `NDArray(2, 2)` the covariance matrix of the Gaussian distribution.
+    Args:
+        mu: `NDArray(2,)` mean of the Gaussian distribution
+        cov: `NDArray(2, 2)` covariance matrix of the Gaussian distribution
 
-    Optional inputs:
-    - output_size:     `BBox` defining the size of the output image. If `None`,
-                        the contour will only be plotted within the 2 standard
-                        deviation ellipse. Default is `None`.
-    - n_ellipse:       `int` the number of points used to draw the ellipses.
-                       Default is `100`.
-    - n_contour:       `int` the number of points used to draw the contour map.
-    - primary_color:   `str` the primary color used for drawing the curves.
-    - secondary_color: `str` the secondary color used for drawing the curves.
-    - colorscale:      `str | list[...]` the colorscale used for drawing the
-                        contours.
+    Optional Args:
+        output_size: `BBox` bounds of the output image. If `None`, the contour
+                     is plotted only within the two-standard-deviation ellipse.
+                     Default is `None`.
+        n_ellipse: `int` number of points used to draw the ellipses. Default is
+                   `100`.
+        n_contour: `int` approximate number of points used to draw the contour
+                   map. Default is `100`.
+        primary_color: `str` primary curve color. Default is `"cyan"`.
+        secondary_color: `str` secondary curve color. Default is `"blue"`.
+        colorscale: `str` or `list` colorscale used for the contours. Default
+                    is `"Viridis"`.
 
     Returns:
-    - traces: `list[go.Contour | go.Scatter]` the traces of the Gaussian
-               distribution.
+        traces: `list[go.Contour | go.Scatter]` traces of the Gaussian
+                distribution
     """
 
     assert mu.shape == (2,) and cov.shape == (2, 2)
@@ -320,29 +344,35 @@ def bin_to_plot(
     return_y_cov: Optional[float] = False
     ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """
-    Bin some (x, y) datapoints into bins in order to plot them.
+    Bin `(x, y)` data points for plotting.
 
-    Inputs
-    - x: `NDArray(N)`
-    - y: `NDArray(N)` or `NDArray(N, d)`
+    Args:
+        x: `NDArray(N)` x-values
+        y: `NDArray(N)` or `NDArray(N, d)` y-values
 
-    Returns
-    - mean_x:    `NDArray(num_bins)`
-    - mean_y:    `NDArray(num_bins)` or `NDArray(num_bins, d)`
-    - std_y:     `NDArray(num_bins)`, `NDArray(num_bins, d)` or \
-                 `NDArray(num_bins, d, d)`
-    - bin_sizes: `NDArray(num_bins)`
+    Optional Args:
+        num_bins: `int` number of desired bins. Default is `100`.
+        min_x: `float` lower bound for the plotted x-values. Default is `0`.
+        max_x: `float` upper bound for the plotted x-values. If `None`, the
+               upper bound is computed with `bound_values_nice`. Default is
+               `None`.
+        return_y_cov: `bool` whether to return covariance matrices for
+                      multidimensional y-values. This must be `True` when `y`
+                      is multidimensional and `False` when `y` is
+                      one-dimensional. Default is `False`.
 
-    Optional Inputs
-    - num_bins:     `int` number of desired bins. Default is 100.
-    - min_x:        `float` the lower bound for the plotted x values. Default is
-                    `0`.
-    - max_x:        `float` the upper bound for the plotted x values. Default is
-                    `None`, which will compute the upper bound via the
-                    `bound_75_percent` function.
-    - return_y_cov: `bool` if `True`, for multi-dimensional y data (i.e. d>1),
-                    the function returns the standard deviation instead of the
-                    variance of the y data. Default is `False`.
+    Returns:
+        mean_x: `NDArray(num_bins)` mean x-value of each nonempty bin
+        mean_y: `NDArray(num_bins)` or `NDArray(num_bins, d)` mean y-value of
+                each nonempty bin
+        std_y: `NDArray(num_bins)` standard deviations, or
+               `NDArray(num_bins, d, d)` covariance matrices
+        bin_sizes: `NDArray(num_bins)` number of data points in each nonempty
+                   bin
+
+    Raises:
+        TypeError: `x` or `y` is not a NumPy array
+        ValueError: the input shapes or `return_y_cov` setting are invalid
     """
     # Assertions
     if not isinstance(x, np.ndarray):

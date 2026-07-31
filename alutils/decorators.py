@@ -13,9 +13,9 @@ def requires_package(*pkgs: str):
     Decorator to check if the required packages are installed before running a
     function. If a package is not installed, an ImportError is raised.
 
-    Inputs
-    - pkgs: one or multiple strings, where each string is the name of a package
-            that is required for running the function.
+    Args:
+        pkgs: one or multiple strings, where each string is the name of a
+              package that is required for running the function.
     """
     def decorator(function):
 
@@ -50,9 +50,10 @@ def verify_input_types(*types: type):
     Decorator to check if the input types of a function are correct. If the
     types are not correct, a `TypeError` is raised.
 
-    Inputs
-    - types: `type` one or multiple types, where each type is the expected type of an
-             input argument.
+    Args:
+        types: `type` one or multiple types, where each type is the expected
+               type of an input argument.
+
     def decorator(function):
 
         @functools.wraps(function)

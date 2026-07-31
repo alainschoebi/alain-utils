@@ -15,11 +15,11 @@ logger = get_logger(__name__)
 # Structures
 Point = TypeVar("Point")
 
+
 class AllPointsInfeasibleError(Exception):
-    """
-    Custom error to be raised when all points in the grid search are infeasible.
-    """
+    """Error raised when all points in a grid search are infeasible."""
     pass
+
 
 def grid_search_min(
     points: list[NDArray],
@@ -28,33 +28,32 @@ def grid_search_min(
     cost: Callable[[Point], float],
 ) -> tuple[Point, float, np.ma.MaskedArray]:
     """
-    Perform a grid search over the given points in the search for a minimum.
+    Search a grid of points for a minimum cost.
 
-    Inputs
-    - points:          `list[NDArray]` list of points to search over. Each point
-                       array is a 1D array of coordinates.
-    - point_transform: `Callable[[NDArray], Point | None]` function to transform
-                       the point coordinates into the desired format. The
-                       function should return None if the point is infeasible.
-    - feasible:        `Callable[[Point], bool]` function to check if the point
-                       is feasible. It should return True if the point is
-                       feasible and False otherwise.
-    - cost:            `Callable[[Point], float]` function to compute the cost
-                       associated to the provided point.
-    Returns
-    - min_point: `Point` the point with the minimum cost.
-    - min_cost:  `float` the minimum cost associated to the point.
-    - costs:     `np.ma.MaskedArray` the grid of costs. The masked values
-                 represent the infeasible points.
+    Args:
+        points: `list[NDArray]` list of points to search over.
+        point_transform: `Callable[[NDArray], Point | None]` function that
+                         converts grid coordinates to the desired point type.
+                         It may return `None` for an infeasible point.
+        feasible: `Callable[[Point], bool]` function that checks whether a
+                  transformed point is feasible
+        cost: `Callable[[Point], float]` function that computes a point's cost
 
-    Raises
-    - AllPointsInfeasibleError: if all points in the grid search are infeasible.
+    Returns:
+        min_point: `Point` feasible point with the minimum cost
+        min_cost: `float` minimum cost
+        costs: `np.ma.MaskedArray` grid of costs in which infeasible points are
+               masked
+
+    Raises:
+        AllPointsInfeasibleError: all points in the grid are infeasible
     """
     # Grid for storing costs
     costs: np.ma.MaskedArray = np.ma.zeros([len(p) for p in points])
 
     # Point from index function
     def point_from_index(index: tuple[int, ...]) -> Point | None:
+        """Transform a grid index into a point."""
         point = np.array([points[i][index[i]] for i in range(len(points))])
         return point_transform(point)
 
@@ -90,6 +89,7 @@ def grid_search_min(
     # Return the minimum point, its cost and the costs grid
     return cast(Point, min_point), min_cost, costs
 
+
 def grid_search_max(
     points: list[NDArray],
     point_transform: Callable[[NDArray], Point | None],
@@ -97,24 +97,25 @@ def grid_search_max(
     cost: Callable[[Point], float],
 ) -> tuple[Point, float, np.ma.MaskedArray]:
     """
-    Perform a grid search over the given points in the search for a maximum.
+    Search a grid of points for a maximum cost.
 
-    Inputs
-    - points:          `list[NDArray]` list of points to search over. Each point
-                       array is a 1D array of coordinates.
-    - point_transform: `Callable[[NDArray], Point | None]` function to transform
-                       the point coordinates into the desired format. The
-                       function should return None if the point is infeasible.
-    - feasible:        `Callable[[Point], bool]` function to check if the point
-                       is feasible. It should return True if the point is
-                       feasible and False otherwise.
-    - cost:            `Callable[[Point], float]` function to compute the cost
-                       associated to the provided point.
-    Returns
-    - max_point: `Point` the point with the maximum cost.
-    - max_cost:  `float` the maximum cost associated to the point.
-    - costs:     `np.ma.MaskedArray` the grid of costs. The masked values
-                 represent the infeasible points.
+    Args:
+        points: `list[NDArray]` list of points to search over
+        point_transform: `Callable[[NDArray], Point | None]` function that
+                         converts grid coordinates to the desired point type.
+                         It may return `None` for an infeasible point.
+        feasible: `Callable[[Point], bool]` function that checks whether a
+                  transformed point is feasible
+        cost: `Callable[[Point], float]` function that computes a point's cost
+
+    Returns:
+        max_point: `Point` feasible point with the maximum cost
+        max_cost: `float` maximum cost
+        costs: `np.ma.MaskedArray` grid of costs in which infeasible points are
+               masked
+
+    Raises:
+        AllPointsInfeasibleError: all points in the grid are infeasible
     """
 
     min_point, min_cost, costs = grid_search_min(

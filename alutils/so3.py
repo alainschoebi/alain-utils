@@ -13,17 +13,37 @@ SO3 = NewType("SO3", NDArray)
 Vector3 = NewType("Vector3", NDArray)
 
 def Exp(rot_vec: Vector3) -> SO3:
+    """
+    Compute the exponential map from a 3D rotation vector to SO(3).
+
+    Args:
+        rot_vec: `NDArray(3,)`, `NDArray(3, 1)`, or `list` rotation vector
+
+    Returns:
+        R: `NDArray(3, 3)` rotation matrix, i.e., an element in SO(3)
+    """
     try:
         rot_vec = np.squeeze(np.array(rot_vec)).astype(float)
         assert rot_vec.shape == (3,)
     except Exception as e:
-        raise ValueError(f"Invalid input `rot_vec`. Could not be cast to a "
-                         f"`NDArray(3,)`. Error: {e}.")
+        raise ValueError(
+            f"Invalid input `rot_vec`. Could not be cast to a `NDArray(3,)`. "
+            f"Error: {e}."
+        )
     R = Rotation.from_rotvec(rot_vec).as_matrix()
     return R
 
 
 def Log(R: SO3) -> Vector3:
+    """
+    Compute the logarithmic map from SO(3) to a 3D rotation vector.
+
+    Args:
+        R: `NDArray(3, 3)` rotation matrix, i.e., an element in SO(3)
+
+    Returns:
+        rot_vec: `NDArray(3,)` rotation vector
+    """
     if not isinstance(R, np.ndarray):
         raise TypeError("R must be a numpy array.")
     if not R.shape == (3, 3):
@@ -37,19 +57,19 @@ def plus_operator(R: SO3, omega: Vector3) -> SO3:
     """
     Performs the `+` operation in the SO(3) group, i.e. `R + omega`.
 
-    The 'plus' operator SO(3) x \R^3 -> SO(3) produces an element of SO(3),
+    The 'plus' operator SO(3) x R^3 -> SO(3) produces an element of SO(3),
     which is the result of composing the reference element R of SO(3) with a
-    small rotation omega vector \R^3.
+    small rotation omega vector in R^3.
 
-    Inputs
-    - R:     `NDArray(3, 3)` the reference rotation matrix, i.e. an element in
-             SO(3).
-    - omega: `NDArray(3,)` or `NDArray(3, 1)` or `list` the rotation vector
-             lying in the tangent space of SO(3) at R.
+    Args:
+        R: `NDArray(3, 3)` the reference rotation matrix, i.e. an element in
+           SO(3)
+        omega: `NDArray(3,)`, `NDArray(3, 1)`, or `list` the rotation vector
+               lying in the tangent space of SO(3) at R
 
-    Returns
-    - R':    `NDArray(3, 3)` the new rotation matrix after applying the 'plus'
-             operator.
+    Returns:
+        R_new: `NDArray(3, 3)` the new rotation matrix after applying the
+               'plus' operator
     """
     return R @ Exp(omega)
 
@@ -58,15 +78,15 @@ def minus_operator(R1: SO3, R2: SO3) -> Vector3:
     """
     Performs the `-` operation in the SO(3) group, i.e. `R1 - R2`.
 
-    The 'minus' operator SO(3) x SO(3) -> \R^3 is defined as the rotation vector
+    The 'minus' operator SO(3) x SO(3) -> R^3 is defined as the rotation vector
     that when applied to R2 produces R1.
 
-    Inputs
-    - R1:  `NDArray(3, 3)` the first rotation matrix, i.e. an element in SO(3).
-    - R2:  `NDArray(3, 3)` the second rotation matrix, i.e. an element in SO(3).
+    Args:
+        R1: `NDArray(3, 3)` the first rotation matrix, i.e. an element in SO(3)
+        R2: `NDArray(3, 3)` the second rotation matrix, i.e. an element in SO(3)
 
-    Returns
-    - omega: `NDArray(3,)` the rotation vector that when applied to R2 produces
-             R1.
+    Returns:
+        omega: `NDArray(3,)` the rotation vector that when applied to R2
+               produces R1
     """
     return Log(R2.T @ R1)
